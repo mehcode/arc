@@ -1,8 +1,11 @@
 use cocoa::base::YES;
 use super::{ObjCObject, View};
+use builder::Builder;
 
 pub trait ViewGroup: ObjCObject {
-    fn add<V: View>(&mut self, view: V) {
+    fn add<U: View, T: Builder<U>>(&mut self, view: T) {
+        let view = view.build();
+
         unsafe {
             msg_send![self.handle(), addSubview:view.handle()];
             msg_send![self.handle(), setNeedsLayout: YES];

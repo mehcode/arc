@@ -8,6 +8,9 @@ mod view_box;
 mod solid_color;
 mod window;
 
+mod view_builder;
+mod solid_color_builder;
+
 pub(crate) use self::object::ObjCObject;
 
 pub use self::app::Application;

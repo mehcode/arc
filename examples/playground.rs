@@ -8,24 +8,13 @@ fn main() {
     let window = Window::new(900., 700.);
     window.set_title("Arc – Playground");
 
-    let mut top_bar = SolidColor::new();
-    top_bar.set_height(30.);
-    top_bar.set_background_color(0xeaeaeb);
+    let top_bar = SolidColor::builder(0xeaeaeb).height(30.);
+    let top_bar_border = SolidColor::builder(0xdbdbdc).height(1.);
 
-    let mut top_bar_border = SolidColor::new();
-    top_bar_border.set_height(1.);
-    top_bar_border.set_background_color(0xdbdbdc);
+    let bottom_bar = SolidColor::builder(0xeaeaeb).height(30.);
+    let bottom_bar_border = SolidColor::builder(0xdbdbdc).height(1.);
 
-    let mut bottom_bar = SolidColor::new();
-    bottom_bar.set_height(30.);
-    bottom_bar.set_background_color(0xeaeaeb);
-
-    let mut bottom_bar_border = SolidColor::new();
-    bottom_bar_border.set_height(1.);
-    bottom_bar_border.set_background_color(0xdbdbdc);
-
-    let mut main = SolidColor::new();
-    main.set_background_color(0xfafafa);
+    let main = SolidColor::builder(0xfafafa);
 
     let mut container = Column::new();
     container.add(top_bar);

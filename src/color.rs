@@ -3,7 +3,7 @@ use palette;
 use palette::Srgb;
 use palette::rgb::{Rgb, RgbStandard};
 
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct Color {
     pub r: f64,
     pub g: f64,

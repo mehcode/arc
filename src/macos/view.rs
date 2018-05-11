@@ -10,6 +10,7 @@ use std::os::raw::c_void;
 use super::ObjCObject;
 use super::super::color::Color;
 
+#[derive(Debug)]
 pub(crate) enum Size {
     Unspecified,
     Absolute(f64),
