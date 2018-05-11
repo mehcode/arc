@@ -1,0 +1,19 @@
+[package]
+name = "arc"
+version = "0.0.1"
+authors = [
+    "leckey.ryan@gmail.com"
+]
+description = "Cross-platform widget toolkit for creating graphical user interfaces in Rust."
+license = "MIT/Apache-2.0"
+homepage = "https://github.com/mehcode/arc-rs"
+repository = "https://github.com/mehcode/arc-rs"
+
+[dependencies]
+failure = "0.1"
+palette = "0.3"
+
+[target.'cfg(target_os = "macos")'.dependencies]
+cocoa = "0.15"
+objc = "0.2"
+lazy_static = "1"
