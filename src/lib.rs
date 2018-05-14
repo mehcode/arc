@@ -12,13 +12,10 @@ extern crate cocoa;
 #[macro_use]
 extern crate objc;
 
-mod builder;
 mod color;
 
 #[cfg(target_os = "macos")]
 mod macos;
-
-pub use self::builder::*;
 
 #[cfg(target_os = "macos")]
 pub use self::macos::*;

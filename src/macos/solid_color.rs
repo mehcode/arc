@@ -1,7 +1,6 @@
 use cocoa::base::id;
 use super::{view, ObjCObject, View};
 use super::super::color::Color;
-use super::solid_color_builder::SolidColorBuilder;
 
 pub struct SolidColor(id);
 
@@ -12,10 +11,6 @@ impl SolidColor {
         self_.set_background_color(color);
 
         self_
-    }
-
-    pub fn builder<T: Into<Color>>(color: T) -> SolidColorBuilder {
-        SolidColorBuilder::new(color)
     }
 }
 
