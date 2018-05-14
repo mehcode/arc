@@ -7,6 +7,7 @@ mod view_group;
 mod view_box;
 mod solid_color;
 mod window;
+mod text;
 
 pub(crate) use self::object::ObjCObject;
 
@@ -18,3 +19,4 @@ pub use self::view_group::ViewGroup;
 pub use self::view::View;
 pub use self::window::Window;
 pub use self::view_box::ViewBox;
+pub use self::text::Text;

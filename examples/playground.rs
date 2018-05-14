@@ -20,7 +20,13 @@ fn main() {
     let mut bottom_bar_border = SolidColor::new(0xdbdbdc);
     bottom_bar_border.set_height(1.);
 
-    let main = SolidColor::new(0xfafafa);
+    let mut line_1 = Text::new();
+    line_1.set_text_color(0x383a42);
+    line_1.set_text("Hello World!");
+
+    let mut main = Row::new();
+    main.set_background_color(0xfafafa);
+    main.add(line_1);
 
     let mut container = Column::new();
     container.add(top_bar);

@@ -33,7 +33,7 @@ lazy_static! {
 pub(crate) struct ViewParams {
     pub(crate) width: Size,
     pub(crate) height: Size,
-    background_color: Color,
+    background_color: Option<Color>,
 }
 
 fn declare() -> &'static Class {
@@ -42,7 +42,6 @@ fn declare() -> &'static Class {
 
     unsafe {
         decl.add_ivar::<*mut c_void>("__arc_view_params");
-
         decl.add_method(sel!(init), init as extern "C" fn(&Object, Sel) -> id);
 
         decl.add_method(
@@ -76,17 +75,18 @@ extern "C" fn is_flipped(_: &Object, _: Sel) -> BOOL {
     YES
 }
 
-extern "C" fn draw_rect(ptr: &Object, _: Sel, dirty_rect: NSRect) {
+pub(crate) extern "C" fn draw_rect(ptr: &Object, _: Sel, dirty_rect: NSRect) {
     unsafe {
         // TODO: Getting parameters should be easier
         let params = (*ptr).get_ivar::<*mut c_void>("__arc_view_params");
         let params: &Box<ViewParams> = mem::transmute(params);
 
-        let Color { r, g, b, a } = params.background_color;
-        let color: id = msg_send![class("NSColor"), colorWithSRGBRed:r green:g blue:b alpha:a];
-        msg_send![color, setFill];
+        if let Some(Color { r, g, b, a }) = params.background_color {
+            let color: id = msg_send![class("NSColor"), colorWithSRGBRed:r green:g blue:b alpha:a];
+            msg_send![color, setFill];
 
-        NSRectFill(dirty_rect);
+            NSRectFill(dirty_rect);
+        }
     }
 }
 
@@ -120,7 +120,7 @@ pub trait View: ObjCObject {
             let params = (*ptr).get_mut_ivar::<*mut c_void>("__arc_view_params");
             let params: &mut Box<ViewParams> = mem::transmute(params);
 
-            params.background_color = color.into();
+            params.background_color = Some(color.into());
         }
     }
 }
