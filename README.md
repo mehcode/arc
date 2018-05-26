@@ -1,6 +1,13 @@
 # Square
 > Native UI toolkit for creating cross-platform graphical user interfaces in Rust.
 
+ - [x] Basic layout: View, Row, Column
+ - [ ] Separate utility traits into the Ext variety and have the view objects more opaque
+ - [ ] Text
+ - [ ] Alignment: Center, Start, End, Stretch
+ - [ ] Justify: Center, Start, End, Stretch
+ - [ ] Image
+
 ## License
 
 Licensed under either of
