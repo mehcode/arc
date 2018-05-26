@@ -72,6 +72,7 @@ extern "C" fn layout(ptr: &Object, _: Sel) {
             }
         }
 
+        let mut x = 0.0;
         let mut y = 0.0;
 
         for i in 0..count {
@@ -105,12 +106,16 @@ extern "C" fn layout(ptr: &Object, _: Sel) {
                 }
             };
 
-            let origin = NSPoint::new(0.0, y);
+            let origin = NSPoint::new(x, y);
             let frame = NSRect::new(origin, NSSize::new(sv_width, sv_height));
 
             msg_send![subview, setFrame: frame];
 
-            y += frame.size.height;
+            if orientation == ORIENTATION_VERTICAL {
+                y += frame.size.height;
+            } else {
+                x += frame.size.width;
+            }
         }
     }
 }
