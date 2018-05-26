@@ -1,5 +1,5 @@
-# Arc
-> Cross-platform widget toolkit for creating graphical user interfaces in Rust.
+# Square
+> Native UI toolkit for creating cross-platform graphical user interfaces in Rust.
 
 ## License
 

@@ -18,11 +18,11 @@ pub struct Text(id);
 
 fn declare() -> &'static Class {
     let super_cls = Class::get("NSTextView").unwrap();
-    let mut decl = ClassDecl::new("ArcText", super_cls).unwrap();
+    let mut decl = ClassDecl::new("SquareText", super_cls).unwrap();
 
     unsafe {
         // FIXME: This is duplicated from `View::declare`
-        decl.add_ivar::<*mut c_void>("__arc_view_params");
+        decl.add_ivar::<*mut c_void>("__square_view_params");
         decl.add_method(sel!(init), init as extern "C" fn(&Object, Sel) -> id);
     }
 
@@ -37,7 +37,7 @@ extern "C" fn init(ptr: &Object, _: Sel) -> id {
     unsafe {
         let params = Box::<ViewParams>::default();
 
-        (*ptr).set_ivar::<*mut c_void>("__arc_view_params", Box::into_raw(params) as *mut c_void);
+        (*ptr).set_ivar::<*mut c_void>("__square_view_params", Box::into_raw(params) as *mut c_void);
     }
 
     unsafe {

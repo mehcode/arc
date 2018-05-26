@@ -1,13 +1,13 @@
 [package]
-name = "arc"
-version = "0.0.2-alpha.0"
+name = "square"
+version = "0.0.1"
 authors = [
     "leckey.ryan@gmail.com"
 ]
-description = "Cross-platform widget toolkit for creating graphical user interfaces in Rust."
+description = "Native UI toolkit for creating cross-platform graphical user interfaces in Rust."
 license = "MIT/Apache-2.0"
-homepage = "https://github.com/mehcode/arc-rs"
-repository = "https://github.com/mehcode/arc-rs"
+homepage = "https://github.com/mehcode/square-rs"
+repository = "https://github.com/mehcode/square-rs"
 
 [dependencies]
 failure = "0.1"

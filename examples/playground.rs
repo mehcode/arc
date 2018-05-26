@@ -1,12 +1,12 @@
-extern crate arc;
+extern crate square;
 
-use arc::*;
+use square::*;
 
 fn main() {
     let app = Application::new();
 
     let window = Window::new(900., 700.);
-    window.set_title("Arc – Playground");
+    window.set_title("Square – Playground");
 
     let mut top_bar = SolidColor::new(0xeaeaeb);
     top_bar.set_height(30.);

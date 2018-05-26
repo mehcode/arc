@@ -21,10 +21,10 @@ pub struct ViewBox(id);
 
 fn declare() -> &'static Class {
     let super_cls = &*view::CLS;
-    let mut decl = ClassDecl::new("ArcViewBox", super_cls).unwrap();
+    let mut decl = ClassDecl::new("SquareViewBox", super_cls).unwrap();
 
     unsafe {
-        decl.add_ivar::<u8>("__arc_view_box_orientation");
+        decl.add_ivar::<u8>("__square_view_box_orientation");
         decl.add_method(sel!(layout), layout as extern "C" fn(&Object, Sel));
     }
 
@@ -35,7 +35,7 @@ extern "C" fn layout(ptr: &Object, _: Sel) {
     unsafe {
         let subviews: id = msg_send![ptr, subviews];
         let count: usize = msg_send![subviews, count];
-        let orientation: u8 = *(*ptr).get_ivar("__arc_view_box_orientation");
+        let orientation: u8 = *(*ptr).get_ivar("__square_view_box_orientation");
 
         let frame_size: NSSize = msg_send![ptr, frameSize];
 
@@ -46,7 +46,7 @@ extern "C" fn layout(ptr: &Object, _: Sel) {
             let subview: id = msg_send![subviews, objectAtIndex: i];
 
             // TODO: Getting parameters should be easier
-            let params = (*subview).get_ivar::<*mut c_void>("__arc_view_params");
+            let params = (*subview).get_ivar::<*mut c_void>("__square_view_params");
             let params: &Box<ViewParams> = mem::transmute(params);
 
             if orientation == ORIENTATION_VERTICAL {
@@ -78,7 +78,7 @@ extern "C" fn layout(ptr: &Object, _: Sel) {
             let subview: id = msg_send![subviews, objectAtIndex: i];
 
             // TODO: Getting parameters should be easier
-            let params = (*subview).get_ivar::<*mut c_void>("__arc_view_params");
+            let params = (*subview).get_ivar::<*mut c_void>("__square_view_params");
             let params: &Box<ViewParams> = mem::transmute(params);
 
             // TODO: Use a balanced formula to ensure we cover the parent view completely
@@ -120,7 +120,7 @@ impl ViewBox {
         let ptr: id = unsafe { msg_send![*CLS, new] };
 
         unsafe {
-            (*ptr).set_ivar("__arc_view_box_orientation", orientation);
+            (*ptr).set_ivar("__square_view_box_orientation", orientation);
         }
 
         ViewBox(ptr)

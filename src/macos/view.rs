@@ -38,10 +38,10 @@ pub(crate) struct ViewParams {
 
 fn declare() -> &'static Class {
     let super_cls = Class::get("NSView").unwrap();
-    let mut decl = ClassDecl::new("ArcView", super_cls).unwrap();
+    let mut decl = ClassDecl::new("SquareView", super_cls).unwrap();
 
     unsafe {
-        decl.add_ivar::<*mut c_void>("__arc_view_params");
+        decl.add_ivar::<*mut c_void>("__square_view_params");
         decl.add_method(sel!(init), init as extern "C" fn(&Object, Sel) -> id);
 
         decl.add_method(
@@ -65,7 +65,7 @@ extern "C" fn init(ptr: &Object, _: Sel) -> id {
     unsafe {
         let params = Box::<ViewParams>::default();
 
-        (*ptr).set_ivar::<*mut c_void>("__arc_view_params", Box::into_raw(params) as *mut c_void);
+        (*ptr).set_ivar::<*mut c_void>("__square_view_params", Box::into_raw(params) as *mut c_void);
     }
 
     ptr
@@ -78,7 +78,7 @@ extern "C" fn is_flipped(_: &Object, _: Sel) -> BOOL {
 pub(crate) extern "C" fn draw_rect(ptr: &Object, _: Sel, dirty_rect: NSRect) {
     unsafe {
         // TODO: Getting parameters should be easier
-        let params = (*ptr).get_ivar::<*mut c_void>("__arc_view_params");
+        let params = (*ptr).get_ivar::<*mut c_void>("__square_view_params");
         let params: &Box<ViewParams> = mem::transmute(params);
 
         if let Some(Color { r, g, b, a }) = params.background_color {
@@ -95,7 +95,7 @@ pub trait View: ObjCObject {
         unsafe {
             // TODO: Getting parameters should be easier
             let ptr = self.handle();
-            let params = (*ptr).get_mut_ivar::<*mut c_void>("__arc_view_params");
+            let params = (*ptr).get_mut_ivar::<*mut c_void>("__square_view_params");
             let params: &mut Box<ViewParams> = mem::transmute(params);
 
             params.height = Size::Absolute(h);
@@ -106,7 +106,7 @@ pub trait View: ObjCObject {
         unsafe {
             // TODO: Getting parameters should be easier
             let ptr = self.handle();
-            let params = (*ptr).get_mut_ivar::<*mut c_void>("__arc_view_params");
+            let params = (*ptr).get_mut_ivar::<*mut c_void>("__square_view_params");
             let params: &mut Box<ViewParams> = mem::transmute(params);
 
             params.width = Size::Absolute(w);
@@ -117,7 +117,7 @@ pub trait View: ObjCObject {
         unsafe {
             // TODO: Getting parameters should be easier
             let ptr = self.handle();
-            let params = (*ptr).get_mut_ivar::<*mut c_void>("__arc_view_params");
+            let params = (*ptr).get_mut_ivar::<*mut c_void>("__square_view_params");
             let params: &mut Box<ViewParams> = mem::transmute(params);
 
             params.background_color = Some(color.into());
