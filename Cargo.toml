@@ -1,19 +1,23 @@
 [package]
 name = "square"
-version = "0.0.1"
-authors = [
-    "leckey.ryan@gmail.com"
-]
-description = "Native UI toolkit for creating cross-platform graphical user interfaces in Rust."
-license = "MIT/Apache-2.0"
-homepage = "https://github.com/mehcode/square-rs"
-repository = "https://github.com/mehcode/square-rs"
+version = "0.1.0"
+authors = ["Ryan Leckey <leckey.ryan@gmail.com>"]
+description = ""
+
+[package.metadata.bundle.example.hello_world]
+name = "Hello World"
+identifier = "io.mehcode.square.example.hello_world"
 
 [dependencies]
-failure = "0.1"
-palette = "0.3"
+lazy_static = "1"
+palette = { version = "0.4", default-features = false }
+yoga-sys = { git = "https://github.com/mehcode/yoga-sys", rev = "4efbc570ccf351dc73273323b653fa1188de88c0" } 
 
 [target.'cfg(target_os = "macos")'.dependencies]
-cocoa = "0.15"
 objc = "0.2"
-lazy_static = "1"
+objc_id = "0.1"
+cocoa = "0.15"
+
+[profile.release]
+codegen-units = 1
+lto = true

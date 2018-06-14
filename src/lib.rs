@@ -1,21 +1,24 @@
-extern crate failure;
-extern crate palette;
-
-#[cfg(target_os = "macos")]
 #[macro_use]
 extern crate lazy_static;
-
-#[cfg(target_os = "macos")]
-extern crate cocoa;
+extern crate palette;
+extern crate yoga_sys;
 
 #[cfg(target_os = "macos")]
 #[macro_use]
 extern crate objc;
 
+#[cfg(target_os = "macos")]
+extern crate cocoa;
+
+#[cfg(target_os = "macos")]
+extern crate objc_id;
+
+mod application;
 mod color;
+mod os;
+mod view;
+mod window;
+mod layout;
 
-#[cfg(target_os = "macos")]
-mod macos;
-
-#[cfg(target_os = "macos")]
-pub use self::macos::*;
+pub use self::{application::Application, color::Color, view::View, window::Window};
+pub use self::layout::FlexDirection;
