@@ -4,9 +4,9 @@ version = "0.1.0"
 authors = ["Ryan Leckey <leckey.ryan@gmail.com>"]
 description = ""
 
-[package.metadata.bundle.example.hello_world]
-name = "Hello World"
-identifier = "io.mehcode.square.example.hello_world"
+[package.metadata.bundle.example.playground]
+name = "Playground"
+identifier = "io.mehcode.square.example.playground"
 
 [dependencies]
 lazy_static = "1"
