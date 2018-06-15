@@ -9,6 +9,7 @@ use std::ptr::null_mut;
 use yoga_sys::{YGDirection, YGNodeCalculateLayout, YGNodeFreeRecursive, YGNodeGetChildCount,
                YGNodeGetParent, YGNodeInsertChild, YGNodeLayoutGetHeight, YGNodeLayoutGetLeft,
                YGNodeLayoutGetTop, YGNodeLayoutGetWidth, YGNodeNew, YGNodeRef,
+               YGNodeStyleSetHeightPercent, YGNodeStyleSetWidthPercent,
                YGNodeStyleSetAlignItems, YGNodeStyleSetFlexDirection, YGNodeStyleSetFlexGrow,
                YGNodeStyleSetHeight, YGNodeStyleSetJustifyContent, YGNodeStyleSetMargin,
                YGNodeStyleSetPadding, YGNodeStyleSetWidth};
@@ -45,11 +46,27 @@ impl View {
         }
     }
 
+    pub(crate) fn set_width_percent(&mut self, width: f32) {
+        unsafe {
+            let node = *(*self.0).get_ivar::<*mut c_void>("sqYGNode") as YGNodeRef;
+
+            YGNodeStyleSetWidthPercent(node, width);
+        }
+    }
+
     pub(crate) fn set_height(&mut self, height: f32) {
         unsafe {
             let node = *(*self.0).get_ivar::<*mut c_void>("sqYGNode") as YGNodeRef;
 
             YGNodeStyleSetHeight(node, height);
+        }
+    }
+
+    pub(crate) fn set_height_percent(&mut self, height: f32) {
+        unsafe {
+            let node = *(*self.0).get_ivar::<*mut c_void>("sqYGNode") as YGNodeRef;
+
+            YGNodeStyleSetHeightPercent(node, height);
         }
     }
 

@@ -29,8 +29,16 @@ impl View {
         self.inner.set_width(width);
     }
 
+    pub fn set_width_percent(&mut self, width: f32) {
+        self.inner.set_width_percent(width * 100.);
+    }
+
     pub fn set_height(&mut self, height: f32) {
         self.inner.set_height(height);
+    }
+
+    pub fn set_height_percent(&mut self, height: f32) {
+        self.inner.set_height_percent(height * 100.);
     }
 
     pub fn set_flex_grow(&mut self, flex_grow: f32) {
