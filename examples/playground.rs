@@ -5,7 +5,7 @@ use square::*;
 fn main() {
     let app = Application::new();
 
-    let mut window = Window::new(800., 500.);
+    let mut window = Window::new(500., 500.);
     window.set_title("Playground");
 
     let mut top = View::new();
@@ -23,10 +23,11 @@ fn main() {
     let mut middle_center = View::new();
     middle_center.set_background_color(0xFAFAFA);
     middle_center.set_flex_grow(1.);
+    middle_center.set_margin(Edge::All, 20.);
 
     let mut middle = View::new();
     middle.set_flex_grow(1.);
-    middle.set_flex_direction(FlexDirection::Row);
+    middle.set_flex_direction(FlexDirection::RowReverse);
     middle.add_child(middle_left);
     middle.add_child(middle_center);
     middle.add_child(middle_right);
@@ -36,6 +37,8 @@ fn main() {
     bottom.set_height(50.);
 
     let mut root = View::new();
+    root.set_padding(Edge::All, 20.);
+    root.set_background_color(0x565656);
     root.add_child(top);
     root.add_child(middle);
     root.add_child(bottom);

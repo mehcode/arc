@@ -15,10 +15,10 @@ extern crate objc_id;
 
 mod application;
 mod color;
+mod layout;
 mod os;
 mod view;
 mod window;
-mod layout;
 
+pub use self::layout::{Align, Edge, FlexDirection, Justify};
 pub use self::{application::Application, color::Color, view::View, window::Window};
-pub use self::layout::FlexDirection;

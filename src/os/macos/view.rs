@@ -1,4 +1,4 @@
-use super::super::super::{Color, FlexDirection};
+use super::super::super::{Align, Color, Edge, FlexDirection, Justify};
 use cocoa::base::{class, id, YES};
 use cocoa::foundation::{NSPoint, NSRect, NSSize, NSUInteger};
 use objc::{declare::ClassDecl,
@@ -9,8 +9,9 @@ use std::ptr::null_mut;
 use yoga_sys::{YGDirection, YGNodeCalculateLayout, YGNodeFreeRecursive, YGNodeGetChildCount,
                YGNodeGetParent, YGNodeInsertChild, YGNodeLayoutGetHeight, YGNodeLayoutGetLeft,
                YGNodeLayoutGetTop, YGNodeLayoutGetWidth, YGNodeNew, YGNodeRef,
-               YGNodeStyleSetFlexDirection,
-               YGNodeStyleSetFlexGrow, YGNodeStyleSetHeight, YGNodeStyleSetWidth};
+               YGNodeStyleSetAlignItems, YGNodeStyleSetFlexDirection, YGNodeStyleSetFlexGrow,
+               YGNodeStyleSetHeight, YGNodeStyleSetJustifyContent, YGNodeStyleSetMargin,
+               YGNodeStyleSetPadding, YGNodeStyleSetWidth};
 
 pub(crate) struct View(pub(crate) Id<Object>);
 
@@ -52,6 +53,38 @@ impl View {
         }
     }
 
+    pub(crate) fn set_align_items(&mut self, align: Align) {
+        unsafe {
+            let node = *(*self.0).get_ivar::<*mut c_void>("sqYGNode") as YGNodeRef;
+
+            YGNodeStyleSetAlignItems(node, align.into_yg());
+        }
+    }
+
+    pub(crate) fn set_justify_content(&mut self, justify: Justify) {
+        unsafe {
+            let node = *(*self.0).get_ivar::<*mut c_void>("sqYGNode") as YGNodeRef;
+
+            YGNodeStyleSetJustifyContent(node, justify.into_yg());
+        }
+    }
+
+    pub(crate) fn set_padding(&mut self, edge: Edge, padding: f32) {
+        unsafe {
+            let node = *(*self.0).get_ivar::<*mut c_void>("sqYGNode") as YGNodeRef;
+
+            YGNodeStyleSetPadding(node, edge.into_yg(), padding);
+        }
+    }
+
+    pub(crate) fn set_margin(&mut self, edge: Edge, margin: f32) {
+        unsafe {
+            let node = *(*self.0).get_ivar::<*mut c_void>("sqYGNode") as YGNodeRef;
+
+            YGNodeStyleSetMargin(node, edge.into_yg(), margin);
+        }
+    }
+
     pub(crate) fn set_flex_grow(&mut self, flex_grow: f32) {
         unsafe {
             let node = *(*self.0).get_ivar::<*mut c_void>("sqYGNode") as YGNodeRef;
@@ -64,7 +97,7 @@ impl View {
         unsafe {
             let node = *(*self.0).get_ivar::<*mut c_void>("sqYGNode") as YGNodeRef;
 
-            YGNodeStyleSetFlexDirection(node, flex_direction.into_yoga());
+            YGNodeStyleSetFlexDirection(node, flex_direction.into_yg());
         }
     }
 
