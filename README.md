@@ -1,12 +1,10 @@
 # Square
 > Native UI toolkit for creating cross-platform graphical user interfaces in Rust.
 
- - [x] Basic layout: View, Row, Column
- - [ ] Separate utility traits into the Ext variety and have the view objects more opaque
- - [ ] Text
- - [ ] Alignment: Center, Start, End, Stretch
- - [ ] Justify: Center, Start, End, Stretch
- - [ ] Image
+![](./example-layout.png)
+
+ * Only supports macOS currently. Support is planned for Windows next and then Linux when time allows.
+ * Uses [Yoga](https://yogalayout.com/) which is an implementation of [Flexbox](https://www.w3.org/TR/css-flexbox-1/) to measure and layout components.
 
 ## License
 
