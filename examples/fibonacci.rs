@@ -4,19 +4,17 @@ use square::*;
 
 fn recursive_view(value: i16) -> View {
 
-    println!("Current iteration -> {}", value);
-
-    let direction = if value % 2 == 0 {
+    let (direction, color) = if value % 2 == 0 {
         if value % 4 == 0 {
-            FlexDirection::Row
+            (FlexDirection::Row, 0xa9d2f0)
         } else {
-            FlexDirection::RowReverse
+            (FlexDirection::RowReverse, 0xa8ecc2)
         }
     } else {
         if (value - 1) % 4 == 0 {
-            FlexDirection::ColumnReverse
+            (FlexDirection::ColumnReverse, 0xf3c99f)
         }else {
-            FlexDirection::Column
+            (FlexDirection::Column, 0xf5b3ac)
         }
     };
 
@@ -26,23 +24,23 @@ fn recursive_view(value: i16) -> View {
     let mut view = View::new();
 
     view.set_flex_grow(8.);
-    view.set_background_color(Color::from((value as u32 * 800 )/ 2));
+    view.set_background_color(color);
+
+    view.set_margin(Edge::All, 1.5);
 
     root.add_child(view);
-
 
     let mut bview = if value != 0 {
         recursive_view(value - 1)
     } else {
         let mut v = View::new();
-        v.set_background_color(0x0d2a4e);
+        v.set_background_color(0xf8e896);
         return v;
     };
 
     bview.set_flex_grow(5.);
 
     root.add_child(bview);
-
     root
 }
 
@@ -53,6 +51,7 @@ fn main() {
     let mut window = Window::new(1280., 800.);
     window.set_title("Fibonacci-ish");
     window.set_view(recursive_view(12));
+    window.set_background_color(0xa9b2bb);
 
     app.add_window(window);
 
