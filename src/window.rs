@@ -11,6 +11,11 @@ impl Window {
         }
     }
 
+    /// Sets whether the window should be resizable.
+    pub fn set_resizable(&mut self, resizable: bool) {
+        self.inner.set_resizable(resizable);
+    }
+
     /// Sets the title of the window.
     pub fn set_title(&mut self, title: impl AsRef<str>) {
         self.inner.set_title(title.as_ref());
