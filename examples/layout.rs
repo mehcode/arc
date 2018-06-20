@@ -6,7 +6,7 @@ fn main() {
     let app = Application::new();
 
     let mut window = Window::new(400., 400.);
-    window.set_title("Square — Layout");
+    window.set_title("Layout");
 
     let mut top_left = View::new();
     top_left.set_background_color(0xe7484d);
