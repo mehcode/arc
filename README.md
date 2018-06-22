@@ -6,6 +6,10 @@
  * Only supports macOS currently. Support is planned for Windows next and then Linux when time allows.
  * Uses [Yoga](https://yogalayout.com/) which is an implementation of [Flexbox](https://www.w3.org/TR/css-flexbox-1/) to measure and layout components.
 
+## Status
+
+Don't use.
+
 ## License
 
 Licensed under either of
