@@ -1,12 +1,14 @@
-use super::{os, Color, View};
+use super::{os, Color, View, Context};
 
 pub struct Window {
+    context: Context,
     pub(crate) inner: os::Window,
 }
 
 impl Window {
-    pub fn new(width: f64, height: f64) -> Self {
+    pub fn new(context: &Context, width: f64, height: f64) -> Self {
         Self {
+            context: context.clone(),
             inner: os::Window::new(width, height),
         }
     }
@@ -27,7 +29,10 @@ impl Window {
     }
 
     /// Set the root view of the window.
-    pub fn set_view(&mut self, view: View) {
-        self.inner.set_view(view.inner);
+    pub fn set_view(&mut self, node: View) {
+        let inner = node.inner.clone();
+        let _ = self.context.emplace_node(node);
+
+        self.inner.set_view(inner);
     }
 }

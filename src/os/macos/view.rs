@@ -3,7 +3,6 @@ use cocoa::base::{class, id, YES};
 use cocoa::foundation::{NSPoint, NSRect, NSSize, NSUInteger};
 use objc::{declare::ClassDecl,
            runtime::{Class, Object, Sel, BOOL}};
-use objc_id::Id;
 use std::os::raw::c_void;
 use std::ptr::null_mut;
 use yoga_sys::{YGDirection, YGNodeCalculateLayout, YGNodeFreeRecursive, YGNodeGetChildCount,
@@ -14,14 +13,19 @@ use yoga_sys::{YGDirection, YGNodeCalculateLayout, YGNodeFreeRecursive, YGNodeGe
                YGNodeStyleSetHeight, YGNodeStyleSetJustifyContent, YGNodeStyleSetMargin,
                YGNodeStyleSetPadding, YGNodeStyleSetWidth};
 
-pub(crate) struct View(pub(crate) Id<Object>);
+pub(crate) struct View(pub(crate) id);
+
+// NOTE: In order to send references of this packed in Context to different threads.
+//       It's very unsafe to touch these unless on the "main" thread but Context ensures 
+//       public access is only allowed on main thread.
+unsafe impl Send for View {}
 
 impl View {
     pub(crate) fn new() -> Self {
         // Allocate and initialize an empty, native view
         let view: id = unsafe { msg_send![*CLASS, new] };
 
-        View(unsafe { Id::from_retained_ptr(view) })
+        View(view)
     }
 
     pub(crate) fn add_child(&mut self, view: View) {
@@ -132,6 +136,25 @@ impl View {
 
             // NOTE: This is only needed at the _root_ of the hierarchy
             msg_send![self.0, setWantsLayer: YES];
+            msg_send![self.0, setNeedsDisplay: YES];
+        }
+    }
+}
+
+impl Clone for View {
+    fn clone(&self) -> Self {
+        unsafe {
+            msg_send![self.0, retain];
+        }
+
+        View(self.0)
+    }
+}
+
+impl Drop for View {
+    fn drop(&mut self) {
+        unsafe {
+            msg_send![self.0, release];
         }
     }
 }

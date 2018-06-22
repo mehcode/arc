@@ -1,4 +1,5 @@
-use super::{os, Align, Color, Edge, FlexDirection, Justify};
+use yoga_sys::YGNode;
+use super::{os, Align, Color, Edge, FlexDirection, Justify, Context};
 
 /// The fundamental component, `View` is a container that supports
 /// layout with **Flexbox** powered by [Yoga](https://yogalayout.com/). View maps directly
@@ -7,18 +8,28 @@ use super::{os, Align, Color, Edge, FlexDirection, Justify};
 /// `View` is designed to be nested inside other views and can have 0 to many children of
 /// any type.
 pub struct View {
+    pub(crate) id: usize,
+    // layout: YGNode,
     pub(crate) inner: os::View,
 }
 
 impl View {
-    pub fn new() -> Self {
+    pub fn new(context: &Context) -> Self {
         Self {
+            id: context.next_id(),
             inner: os::View::new(),
         }
     }
 
-    pub fn add_child(&mut self, child: View) {
-        self.inner.add_child(child.inner);
+    pub fn id(&self) -> usize {
+        self.id
+    }
+
+    pub fn add_child(&mut self, context: &Context, child: View) {
+        let inner = child.inner.clone();
+        context.emplace_node(child);
+
+        self.inner.add_child(inner);
     }
 
     pub fn set_background_color(&mut self, color: impl Into<Color>) {

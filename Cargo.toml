@@ -12,11 +12,14 @@ identifier = "io.mehcode.square.example.layout"
 lazy_static = "1"
 palette = { version = "0.4", default-features = false }
 yoga-sys = { git = "https://github.com/mehcode/yoga-sys", rev = "4efbc570ccf351dc73273323b653fa1188de88c0" } 
+fnv = "1.0.3"
+parking_lot = "0.6"
 
 [target.'cfg(target_os = "macos")'.dependencies]
 objc = "0.2"
 objc_id = "0.1"
 cocoa = "0.15"
+dispatch = "0.1"
 
 [profile.release]
 codegen-units = 1

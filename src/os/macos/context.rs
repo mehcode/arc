@@ -3,17 +3,18 @@ use cocoa::{appkit::{NSApp, NSApplication, NSApplicationActivateIgnoringOtherApp
                      NSApplicationActivationPolicy, NSApplicationActivationPolicyProhibited,
                      NSApplicationActivationPolicyRegular, NSMenu, NSMenuItem,
                      NSRunningApplication},
-            base::{id, nil, YES},
+            base::{id, nil, YES, class},
             foundation::{NSAutoreleasePool, NSProcessInfo, NSString}};
 use objc::{declare::ClassDecl,
            runtime::{Class, Object, Sel, BOOL}};
 use std::cell::Cell;
+use dispatch;
 
-pub(crate) struct Application {
+pub(crate) struct Context {
     pool: Cell<Option<id>>,
 }
 
-impl Application {
+impl Context {
     pub(crate) fn new() -> Self {
         let pool = unsafe { NSAutoreleasePool::new(nil) };
         unsafe {
@@ -89,9 +90,13 @@ impl Application {
             msg_send![app, run];
         }
     }
+
+    pub(crate) fn execute_on_main_thread(&self, callback: impl (FnOnce() -> ()) + Send) {
+        dispatch::Queue::main().sync(callback);
+    }
 }
 
-impl Drop for Application {
+impl Drop for Context {
     fn drop(&mut self) {
         if let Some(pool) = self.pool.take() {
             unsafe {
@@ -115,6 +120,12 @@ fn declare_delegate() -> &'static Class {
             should_terminate_after_last_window_closed
                 as extern "C" fn(_: &Object, _: Sel, _: id) -> BOOL,
         );
+
+        delegate_cls_decl.add_method(
+            sel!(applicationShouldTerminate:),
+            should_terminate
+                as extern "C" fn(_: &Object, _: Sel, _: id) -> i32,
+        );
     }
 
     delegate_cls_decl.register()
@@ -122,4 +133,16 @@ fn declare_delegate() -> &'static Class {
 
 extern "C" fn should_terminate_after_last_window_closed(_: &Object, _: Sel, _: id) -> BOOL {
     YES
+}
+
+// Translate :terminate with :stop
+// This allows us to cleanly exit the runloop on the rust side
+extern "C" fn should_terminate(_: &Object, _: Sel, _: id) -> i32 {
+    unsafe {
+        let app: id = msg_send![class("NSApplication"), sharedApplication];
+        msg_send![app, stop: nil];
+    }
+
+    // NSTerminateCancel
+    0
 }
