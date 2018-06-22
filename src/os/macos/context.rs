@@ -3,12 +3,12 @@ use cocoa::{appkit::{NSApp, NSApplication, NSApplicationActivateIgnoringOtherApp
                      NSApplicationActivationPolicy, NSApplicationActivationPolicyProhibited,
                      NSApplicationActivationPolicyRegular, NSMenu, NSMenuItem,
                      NSRunningApplication},
-            base::{id, nil, YES, class},
+            base::{class, id, nil, YES},
             foundation::{NSAutoreleasePool, NSProcessInfo, NSString}};
+use dispatch;
 use objc::{declare::ClassDecl,
            runtime::{Class, Object, Sel, BOOL}};
 use std::cell::Cell;
-use dispatch;
 
 pub(crate) struct Context {
     pool: Cell<Option<id>>,
@@ -91,7 +91,7 @@ impl Context {
         }
     }
 
-    pub(crate) fn execute_on_main_thread(&self, callback: impl (FnOnce() -> ()) + Send) {
+    pub(crate) fn execute_on_main_thread(&self, callback: impl FnOnce() -> () + Send) {
         dispatch::Queue::main().sync(callback);
     }
 }
@@ -123,8 +123,7 @@ fn declare_delegate() -> &'static Class {
 
         delegate_cls_decl.add_method(
             sel!(applicationShouldTerminate:),
-            should_terminate
-                as extern "C" fn(_: &Object, _: Sel, _: id) -> i32,
+            should_terminate as extern "C" fn(_: &Object, _: Sel, _: id) -> i32,
         );
     }
 

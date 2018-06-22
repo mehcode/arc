@@ -44,10 +44,10 @@ impl Window {
 
     pub(crate) fn set_resizable(&mut self, resizable: bool) {
         unsafe {
-            let mut  style: NSWindowStyleMask = msg_send![self.0, styleMask];
+            let mut style: NSWindowStyleMask = msg_send![self.0, styleMask];
             style.set(NSWindowStyleMask::NSResizableWindowMask, resizable);
 
-            msg_send![self.0, setStyleMask: style]; 
+            msg_send![self.0, setStyleMask: style];
         }
     }
 

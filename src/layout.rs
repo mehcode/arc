@@ -1,4 +1,24 @@
-use yoga_sys::{YGAlign, YGEdge, YGFlexDirection, YGJustify};
+use yoga_sys::{YGAlign, YGEdge, YGFlexDirection, YGJustify, YGPositionType, YGWrap};
+
+/// Position type describes how to position within the parent.
+///
+/// Default: `Relative`
+#[derive(Debug)]
+pub enum PositionType {
+    Relative,
+    Absolute,
+}
+
+impl PositionType {
+    pub(crate) fn into_yg(self) -> YGPositionType {
+        use self::YGPositionType::*;
+
+        match self {
+            PositionType::Relative => YGPositionTypeRelative,
+            PositionType::Absolute => YGPositionTypeAbsolute,
+        }
+    }
+}
 
 /// Align describes how to align children along the cross axis of their container.
 #[derive(Debug)]
@@ -79,6 +99,28 @@ impl Justify {
             Justify::SpaceAround => YGJustifySpaceAround,
             Justify::SpaceBetween => YGJustifySpaceBetween,
             Justify::SpaceEvenly => YGJustifySpaceEvenly,
+        }
+    }
+}
+
+/// Wrap controls what happens when children overflow
+/// the size of the container along the main axis. By default children are forced
+/// into a single line (which can shrink elements).
+#[derive(Debug)]
+pub enum Wrap {
+    NoWrap,
+    Wrap,
+    WrapReverse,
+}
+
+impl Wrap {
+    pub(crate) fn into_yg(self) -> YGWrap {
+        use self::YGWrap::*;
+
+        match self {
+            Wrap::Wrap => YGWrapWrap,
+            Wrap::WrapReverse => YGWrapWrapReverse,
+            Wrap::NoWrap => YGWrapNoWrap,
         }
     }
 }

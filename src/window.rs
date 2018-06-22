@@ -1,4 +1,4 @@
-use super::{os, Color, View, Context};
+use super::{os, Color, Context, View};
 
 pub struct Window {
     context: Context,

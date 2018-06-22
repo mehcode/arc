@@ -1,4 +1,4 @@
-use super::super::super::{Align, Color, Edge, FlexDirection, Justify};
+use super::super::super::Color;
 use cocoa::base::{class, id, YES};
 use cocoa::foundation::{NSPoint, NSRect, NSSize, NSUInteger};
 use objc::{declare::ClassDecl,
@@ -7,16 +7,12 @@ use std::os::raw::c_void;
 use std::ptr::null_mut;
 use yoga_sys::{YGDirection, YGNodeCalculateLayout, YGNodeFreeRecursive, YGNodeGetChildCount,
                YGNodeGetParent, YGNodeInsertChild, YGNodeLayoutGetHeight, YGNodeLayoutGetLeft,
-               YGNodeLayoutGetTop, YGNodeLayoutGetWidth, YGNodeNew, YGNodeRef,
-               YGNodeStyleSetHeightPercent, YGNodeStyleSetWidthPercent,
-               YGNodeStyleSetAlignItems, YGNodeStyleSetFlexDirection, YGNodeStyleSetFlexGrow,
-               YGNodeStyleSetHeight, YGNodeStyleSetJustifyContent, YGNodeStyleSetMargin,
-               YGNodeStyleSetPadding, YGNodeStyleSetWidth};
+               YGNodeLayoutGetTop, YGNodeLayoutGetWidth, YGNodeNew, YGNodeRef};
 
 pub(crate) struct View(pub(crate) id);
 
 // NOTE: In order to send references of this packed in Context to different threads.
-//       It's very unsafe to touch these unless on the "main" thread but Context ensures 
+//       It's very unsafe to touch these unless on the "main" thread but Context ensures
 //       public access is only allowed on main thread.
 unsafe impl Send for View {}
 
@@ -42,83 +38,14 @@ impl View {
         }
     }
 
-    pub(crate) fn set_width(&mut self, width: f32) {
-        unsafe {
-            let node = *(*self.0).get_ivar::<*mut c_void>("sqYGNode") as YGNodeRef;
-
-            YGNodeStyleSetWidth(node, width);
-        }
+    pub(crate) unsafe fn yoga_node(&self) -> YGNodeRef {
+        *(*self.0).get_ivar::<*mut c_void>("sqYGNode") as YGNodeRef
     }
 
-    pub(crate) fn set_width_percent(&mut self, width: f32) {
+    /// Inform the view that a layout pass is needed before the next draw.
+    pub(crate) fn set_needs_layout(&mut self) {
         unsafe {
-            let node = *(*self.0).get_ivar::<*mut c_void>("sqYGNode") as YGNodeRef;
-
-            YGNodeStyleSetWidthPercent(node, width);
-        }
-    }
-
-    pub(crate) fn set_height(&mut self, height: f32) {
-        unsafe {
-            let node = *(*self.0).get_ivar::<*mut c_void>("sqYGNode") as YGNodeRef;
-
-            YGNodeStyleSetHeight(node, height);
-        }
-    }
-
-    pub(crate) fn set_height_percent(&mut self, height: f32) {
-        unsafe {
-            let node = *(*self.0).get_ivar::<*mut c_void>("sqYGNode") as YGNodeRef;
-
-            YGNodeStyleSetHeightPercent(node, height);
-        }
-    }
-
-    pub(crate) fn set_align_items(&mut self, align: Align) {
-        unsafe {
-            let node = *(*self.0).get_ivar::<*mut c_void>("sqYGNode") as YGNodeRef;
-
-            YGNodeStyleSetAlignItems(node, align.into_yg());
-        }
-    }
-
-    pub(crate) fn set_justify_content(&mut self, justify: Justify) {
-        unsafe {
-            let node = *(*self.0).get_ivar::<*mut c_void>("sqYGNode") as YGNodeRef;
-
-            YGNodeStyleSetJustifyContent(node, justify.into_yg());
-        }
-    }
-
-    pub(crate) fn set_padding(&mut self, edge: Edge, padding: f32) {
-        unsafe {
-            let node = *(*self.0).get_ivar::<*mut c_void>("sqYGNode") as YGNodeRef;
-
-            YGNodeStyleSetPadding(node, edge.into_yg(), padding);
-        }
-    }
-
-    pub(crate) fn set_margin(&mut self, edge: Edge, margin: f32) {
-        unsafe {
-            let node = *(*self.0).get_ivar::<*mut c_void>("sqYGNode") as YGNodeRef;
-
-            YGNodeStyleSetMargin(node, edge.into_yg(), margin);
-        }
-    }
-
-    pub(crate) fn set_flex_grow(&mut self, flex_grow: f32) {
-        unsafe {
-            let node = *(*self.0).get_ivar::<*mut c_void>("sqYGNode") as YGNodeRef;
-
-            YGNodeStyleSetFlexGrow(node, flex_grow);
-        }
-    }
-
-    pub(crate) fn set_flex_direction(&mut self, flex_direction: FlexDirection) {
-        unsafe {
-            let node = *(*self.0).get_ivar::<*mut c_void>("sqYGNode") as YGNodeRef;
-
-            YGNodeStyleSetFlexDirection(node, flex_direction.into_yg());
+            msg_send![self.0, setNeedsLayout: YES];
         }
     }
 

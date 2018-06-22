@@ -1,10 +1,10 @@
 use super::os;
-use super::Window;
 use super::View;
-use std::sync::{Arc};
+use super::Window;
+use fnv::FnvHashMap;
 use parking_lot::{Mutex, RwLock};
 use std::sync::atomic::{AtomicUsize, Ordering};
-use fnv::FnvHashMap;
+use std::sync::Arc;
 
 #[derive(Clone)]
 pub struct Context {
@@ -43,7 +43,7 @@ impl Context {
         self.inner.inner.run();
     }
 
-    pub fn update_by_id(&self, id: usize, callback: impl (FnOnce(&mut View) -> ()) + Send) {
+    pub fn update_by_id(&self, id: usize, callback: impl FnOnce(&mut View) -> () + Send) {
         if let Some(node) = self.inner.nodes.write().get_mut(&id) {
             self.inner.inner.execute_on_main_thread(move || {
                 callback(node);

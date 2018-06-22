@@ -1,9 +1,9 @@
 #[macro_use]
 extern crate lazy_static;
-extern crate palette;
-extern crate yoga_sys;
 extern crate fnv;
+extern crate palette;
 extern crate parking_lot;
+extern crate yoga_sys;
 
 #[cfg(target_os = "macos")]
 #[macro_use]
@@ -18,12 +18,12 @@ extern crate dispatch;
 #[cfg(target_os = "macos")]
 extern crate objc_id;
 
-mod context;
 mod color;
+mod context;
 mod layout;
 mod os;
 mod view;
 mod window;
 
-pub use self::layout::{Align, Edge, FlexDirection, Justify};
-pub use self::{context::Context, color::Color, view::View, window::Window};
+pub use self::layout::{Align, Edge, FlexDirection, Justify, PositionType, Wrap};
+pub use self::{color::Color, context::Context, view::View, window::Window};
