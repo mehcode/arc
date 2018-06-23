@@ -1,17 +1,18 @@
-use palette::Srgb;
+use palette::Srgba;
 
 pub struct Color {
-    pub(crate) inner: Srgb<f64>,
+    pub(crate) inner: Srgba<f64>,
 }
 
 impl From<u32> for Color {
-    fn from(rgb: u32) -> Color {
-        let r = (rgb >> 16) as u8;
-        let g = (rgb >> 8) as u8;
-        let b = rgb as u8;
+    fn from(argb: u32) -> Color {
+        let a = (argb >> 24) as u8;
+        let r = (argb >> 16) as u8;
+        let g = (argb >> 8) as u8;
+        let b = argb as u8;
 
         Color {
-            inner: Srgb::new(r, g, b).into_format(),
+            inner: Srgba::new(r, g, b, a).into_format(),
         }
     }
 }

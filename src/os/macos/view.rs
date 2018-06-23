@@ -55,7 +55,7 @@ impl View {
                 colorWithRed: color.inner.red
                        green: color.inner.green
                         blue: color.inner.blue
-                       alpha: 1.0_f64];
+                       alpha: color.inner.alpha];
 
             msg_send![color, retain];
 
