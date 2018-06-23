@@ -54,10 +54,10 @@ impl Window {
     pub(crate) fn set_background_color(&mut self, color: Color) {
         unsafe {
             let color: id = msg_send![class("NSColor"), 
-                colorWithRed: color.inner.red
-                       green: color.inner.green
-                        blue: color.inner.blue
-                       alpha: 1.0_f64];
+                colorWithRed: color.inner.red as f64
+                       green: color.inner.green as f64
+                        blue: color.inner.blue as f64
+                       alpha: color.inner.alpha as f64];
 
             msg_send![self.0, setBackgroundColor: color];
         }
