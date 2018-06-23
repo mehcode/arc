@@ -1,8 +1,10 @@
 use super::super::super::Color;
 use super::View;
-use cocoa::{appkit::{NSBackingStoreType, NSWindow, NSWindowStyleMask},
-            base::{class, id, nil, NO, YES},
-            foundation::{NSPoint, NSRect, NSSize, NSString}};
+use cocoa::{
+    appkit::{NSBackingStoreType, NSWindow, NSWindowStyleMask},
+    base::{class, id, nil, NO, YES},
+    foundation::{NSPoint, NSRect, NSSize, NSString},
+};
 use objc::runtime::Object;
 use objc_id::Id;
 
@@ -10,7 +12,8 @@ pub(crate) struct Window(pub(crate) Id<Object>);
 
 impl Window {
     pub(crate) fn new(width: f64, height: f64) -> Self {
-        let style = NSWindowStyleMask::NSTitledWindowMask | NSWindowStyleMask::NSClosableWindowMask
+        let style = NSWindowStyleMask::NSTitledWindowMask
+            | NSWindowStyleMask::NSClosableWindowMask
             | NSWindowStyleMask::NSResizableWindowMask
             | NSWindowStyleMask::NSMiniaturizableWindowMask;
 

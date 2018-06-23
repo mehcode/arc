@@ -1,13 +1,17 @@
 use super::super::super::Color;
 use cocoa::base::{class, id, YES};
 use cocoa::foundation::{NSPoint, NSRect, NSSize, NSUInteger};
-use objc::{declare::ClassDecl,
-           runtime::{Class, Object, Sel, BOOL}};
+use objc::{
+    declare::ClassDecl,
+    runtime::{Class, Object, Sel, BOOL},
+};
 use std::os::raw::c_void;
 use std::ptr::null_mut;
-use yoga_sys::{YGDirection, YGNodeCalculateLayout, YGNodeFreeRecursive, YGNodeGetChildCount,
-               YGNodeGetParent, YGNodeInsertChild, YGNodeLayoutGetHeight, YGNodeLayoutGetLeft,
-               YGNodeLayoutGetTop, YGNodeLayoutGetWidth, YGNodeNew, YGNodeRef};
+use yoga_sys::{
+    YGDirection, YGNodeCalculateLayout, YGNodeFreeRecursive, YGNodeGetChildCount, YGNodeGetParent,
+    YGNodeInsertChild, YGNodeLayoutGetHeight, YGNodeLayoutGetLeft, YGNodeLayoutGetTop,
+    YGNodeLayoutGetWidth, YGNodeNew, YGNodeRef,
+};
 
 pub(crate) struct View(pub(crate) id);
 

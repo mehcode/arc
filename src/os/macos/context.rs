@@ -1,13 +1,18 @@
 use super::Window;
-use cocoa::{appkit::{NSApp, NSApplication, NSApplicationActivateIgnoringOtherApps,
-                     NSApplicationActivationPolicy, NSApplicationActivationPolicyProhibited,
-                     NSApplicationActivationPolicyRegular, NSMenu, NSMenuItem,
-                     NSRunningApplication},
-            base::{class, id, nil, YES},
-            foundation::{NSAutoreleasePool, NSProcessInfo, NSString}};
+use cocoa::{
+    appkit::{
+        NSApp, NSApplication, NSApplicationActivateIgnoringOtherApps,
+        NSApplicationActivationPolicy, NSApplicationActivationPolicyProhibited,
+        NSApplicationActivationPolicyRegular, NSMenu, NSMenuItem, NSRunningApplication,
+    },
+    base::{class, id, nil, YES},
+    foundation::{NSAutoreleasePool, NSProcessInfo, NSString},
+};
 use dispatch;
-use objc::{declare::ClassDecl,
-           runtime::{Class, Object, Sel, BOOL}};
+use objc::{
+    declare::ClassDecl,
+    runtime::{Class, Object, Sel, BOOL},
+};
 use std::cell::Cell;
 
 pub(crate) struct Context {

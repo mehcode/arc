@@ -1,11 +1,13 @@
 use super::{os, Align, Color, Context, Edge, FlexDirection, Justify, PositionType, Wrap};
-use yoga_sys::{YGNodeStyleSetAlignContent, YGNodeStyleSetAlignItems, YGNodeStyleSetAlignSelf,
-               YGNodeStyleSetFlexBasis, YGNodeStyleSetFlexDirection, YGNodeStyleSetFlexGrow,
-               YGNodeStyleSetFlexShrink, YGNodeStyleSetFlexWrap, YGNodeStyleSetHeight,
-               YGNodeStyleSetHeightPercent, YGNodeStyleSetJustifyContent, YGNodeStyleSetMargin,
-               YGNodeStyleSetMaxHeight, YGNodeStyleSetMaxWidth, YGNodeStyleSetMinHeight,
-               YGNodeStyleSetMinWidth, YGNodeStyleSetPadding, YGNodeStyleSetPosition,
-               YGNodeStyleSetPositionType, YGNodeStyleSetWidth, YGNodeStyleSetWidthPercent};
+use yoga_sys::{
+    YGNodeStyleSetAlignContent, YGNodeStyleSetAlignItems, YGNodeStyleSetAlignSelf,
+    YGNodeStyleSetFlexBasis, YGNodeStyleSetFlexDirection, YGNodeStyleSetFlexGrow,
+    YGNodeStyleSetFlexShrink, YGNodeStyleSetFlexWrap, YGNodeStyleSetHeight,
+    YGNodeStyleSetHeightPercent, YGNodeStyleSetJustifyContent, YGNodeStyleSetMargin,
+    YGNodeStyleSetMaxHeight, YGNodeStyleSetMaxWidth, YGNodeStyleSetMinHeight,
+    YGNodeStyleSetMinWidth, YGNodeStyleSetPadding, YGNodeStyleSetPosition,
+    YGNodeStyleSetPositionType, YGNodeStyleSetWidth, YGNodeStyleSetWidthPercent,
+};
 
 /// The fundamental component, `View` is a container that supports
 /// layout with **Flexbox** powered by [Yoga](https://yogalayout.com/). View maps directly

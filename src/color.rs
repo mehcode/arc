@@ -20,7 +20,7 @@ impl<'a> From<u32> for Color {
 impl<'a> From<&'a [f32; 3]> for Color {
     fn from(rgb: &'a [f32; 3]) -> Color {
         Color {
-            inner: Srgba::new(rgb[0], rgb[1], rgb[2], 1.).into_format()
+            inner: Srgba::new(rgb[0], rgb[1], rgb[2], 1.).into_format(),
         }
     }
 }
@@ -28,7 +28,7 @@ impl<'a> From<&'a [f32; 3]> for Color {
 impl<'a> From<&'a [f32; 4]> for Color {
     fn from(argb: &'a [f32; 4]) -> Color {
         Color {
-            inner: Srgba::new(argb[1], argb[2], argb[3], argb[0]).into_format()
+            inner: Srgba::new(argb[1], argb[2], argb[3], argb[0]).into_format(),
         }
     }
 }
