@@ -1,9 +1,9 @@
-use super::super::super::Color;
+use super::super::super::{events, Color, Event};
+use cocoa::appkit::NSEvent;
 use cocoa::base::{class, id, YES};
 use cocoa::foundation::{NSPoint, NSRect, NSSize, NSUInteger};
 use objc::{
-    declare::ClassDecl,
-    runtime::{Class, Object, Sel, BOOL},
+    declare::ClassDecl, runtime::{Class, Object, Sel, BOOL},
 };
 use std::os::raw::c_void;
 use std::ptr::null_mut;
@@ -12,6 +12,8 @@ use yoga_sys::{
     YGNodeInsertChild, YGNodeLayoutGetHeight, YGNodeLayoutGetLeft, YGNodeLayoutGetTop,
     YGNodeLayoutGetWidth, YGNodeNew, YGNodeRef,
 };
+
+// TODO: Investigate ways to make this file more "safe"
 
 pub(crate) struct View(pub(crate) id);
 
@@ -70,6 +72,10 @@ impl View {
             msg_send![self.0, setNeedsDisplay: YES];
         }
     }
+
+    pub(crate) fn mouse_down(&mut self) -> &mut Event<events::MouseDown> {
+        unsafe { &mut *(*(*self.0).get_mut_ivar::<*mut c_void>("sqEVTMouseDown") as *mut _) }
+    }
 }
 
 impl Clone for View {
@@ -99,8 +105,17 @@ fn declare() -> &'static Class {
     let mut cls_decl = ClassDecl::new("SQView", super_cls).unwrap();
 
     unsafe {
+        // Yoga Node (ivar)
         cls_decl.add_ivar::<*mut c_void>("sqYGNode");
+
+        // Background Color (ivar)
         cls_decl.add_ivar::<id>("sqBackgroundColor");
+
+        // Events (ivar)
+
+        cls_decl.add_ivar::<*mut c_void>("sqEVTMouseDown");
+
+        // Methods
 
         cls_decl.add_method(sel!(init), init as extern "C" fn(_: &Object, _: Sel) -> id);
         cls_decl.add_method(sel!(dealloc), dealloc as extern "C" fn(_: &Object, _: Sel));
@@ -126,6 +141,23 @@ fn declare() -> &'static Class {
             sel!(updateLayer),
             update_layer as extern "C" fn(_: &Object, _: Sel),
         );
+
+        // Events (method)
+
+        cls_decl.add_method(
+            sel!(mouseDown:),
+            mouse_down as extern "C" fn(_: &Object, _: Sel, _: id),
+        );
+
+        cls_decl.add_method(
+            sel!(rightMouseDown:),
+            mouse_down as extern "C" fn(_: &Object, _: Sel, _: id),
+        );
+
+        cls_decl.add_method(
+            sel!(otherMouseDown:),
+            mouse_down as extern "C" fn(_: &Object, _: Sel, _: id),
+        );
     }
 
     cls_decl.register()
@@ -133,12 +165,19 @@ fn declare() -> &'static Class {
 
 extern "C" fn init(this: &Object, _: Sel) -> id {
     unsafe {
-        // Run our superclass initializer
+        // Superclass
         let super_cls = Class::get("NSView").unwrap();
         let this: id = msg_send![super(this, super_cls), init];
 
-        // Initialize a new yoga node (for layout)
+        // Yoga node (for layout)
         (*this).set_ivar("sqYGNode", YGNodeNew() as *mut c_void);
+
+        // Events
+        // TODO: Init these on demand
+        (*this).set_ivar(
+            "sqEVTMouseDown",
+            Box::into_raw(Box::new(Event::<events::MouseDown>::new())) as *mut c_void,
+        );
 
         this
     }
@@ -158,6 +197,11 @@ extern "C" fn dealloc(this: &Object, _: Sel) {
             msg_send![subview, removeFromSuperview];
             msg_send![subview, release];
         }
+
+        // Events
+        let _ = Box::from_raw(
+            *(*this).get_ivar::<*mut c_void>("sqEVTMouseDown") as *mut Event<events::MouseDown>
+        );
 
         // Release the stored NSColor for background color
         let background_color: &id = (*this).get_ivar::<id>("sqBackgroundColor");
@@ -196,8 +240,6 @@ extern "C" fn layout(this: &Object, _: Sel) {
             // Apply layout
             let left = YGNodeLayoutGetLeft(node) as f64;
             let top = YGNodeLayoutGetTop(node) as f64;
-            // let right = YGNodeLayoutGetRight(node);
-            // let bottom = YGNodeLayoutGetBottom(node);
             let width = YGNodeLayoutGetWidth(node) as f64;
             let height = YGNodeLayoutGetHeight(node) as f64;
 
@@ -237,5 +279,31 @@ extern "C" fn update_layer(this: &Object, _: Sel) {
             let layer: id = msg_send![this, layer];
             msg_send![layer, setBackgroundColor: background_color];
         }
+    }
+}
+
+extern "C" fn mouse_down(this: &Object, _: Sel, native_event: id) {
+    unsafe {
+        let event =
+            &*(*(*this).get_ivar::<*mut c_void>("sqEVTMouseDown") as *mut Event<events::MouseDown>);
+
+        let button = match native_event.buttonNumber() {
+            0 => events::MouseButton::Left,
+            1 => events::MouseButton::Right,
+            2 => events::MouseButton::Middle,
+            other => events::MouseButton::Other(other as u8),
+        };
+
+        // Even though the NSView is declared to have flipped coordinates the NSEvent
+        // reports the location-in-window as (0,0) in bottom-left (we want top-left)
+        let window: id = msg_send![this, window];
+        let window_frame: NSRect = msg_send![window, contentLayoutRect];
+        let mut location = native_event.locationInWindow();
+        location.y = window_frame.size.height - location.y;
+
+        event.dispatch(events::MouseDown {
+            location: (location.x as f32, location.y as f32),
+            button,
+        });
     }
 }

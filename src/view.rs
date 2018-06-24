@@ -1,4 +1,6 @@
-use super::{os, Align, Color, Context, Edge, FlexDirection, Justify, PositionType, Wrap};
+use super::{
+    events, os, Align, Color, Context, Edge, Event, FlexDirection, Justify, PositionType, Wrap,
+};
 use yoga_sys::{
     YGNodeStyleSetAlignContent, YGNodeStyleSetAlignItems, YGNodeStyleSetAlignSelf,
     YGNodeStyleSetFlexBasis, YGNodeStyleSetFlexDirection, YGNodeStyleSetFlexGrow,
@@ -33,14 +35,36 @@ impl View {
     pub fn id(&self) -> usize {
         self.id
     }
+}
 
-    pub fn add_child(&mut self, context: &Context, child: View) {
+//
+// Container
+//
+
+impl View {
+    pub fn add(&mut self, context: &Context, child: View) {
         let inner = child.inner.clone();
         context.emplace_node(child);
 
         self.inner.add_child(inner);
     }
+}
 
+//
+// Events
+//
+
+impl View {
+    pub fn mouse_down(&mut self) -> &mut Event<events::MouseDown> {
+        self.inner.mouse_down()
+    }
+}
+
+//
+// Style
+//
+
+impl View {
     /// Sets the background color for this view.
     ///
     /// Default: `transparent` (`0x00_00_00_00`)
