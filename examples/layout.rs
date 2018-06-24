@@ -20,8 +20,8 @@ fn main() {
     let mut top = View::new(&c);
     top.set_flex_direction(FlexDirection::Row);
     top.set_height_percent(0.3);
-    top.add_child(&c, top_left);
-    top.add_child(&c, top_right);
+    top.add(&c, top_left);
+    top.add(&c, top_right);
 
     let mut bottom_left = View::new(&c);
     bottom_left.set_background_color(0xffe7484d);
@@ -39,21 +39,21 @@ fn main() {
     let mut bottom_right = View::new(&c);
     bottom_right.set_margin(Edge::Start, 20.);
     bottom_right.set_flex_grow(1.0);
-    bottom_right.add_child(&c, bottom_right_1);
-    bottom_right.add_child(&c, bottom_right_2);
+    bottom_right.add(&c, bottom_right_1);
+    bottom_right.add(&c, bottom_right_2);
 
     let mut bottom = View::new(&c);
     bottom.set_margin(Edge::Top, 20.);
     bottom.set_flex_direction(FlexDirection::Row);
     bottom.set_flex_grow(1.);
-    bottom.add_child(&c, bottom_left);
-    bottom.add_child(&c, bottom_right);
+    bottom.add(&c, bottom_left);
+    bottom.add(&c, bottom_right);
 
     let mut root = View::new(&c);
     root.set_padding(Edge::All, 20.);
     root.set_background_color(0xff0d2a4e);
-    root.add_child(&c, top);
-    root.add_child(&c, bottom);
+    root.add(&c, top);
+    root.add(&c, bottom);
 
     window.set_view(root);
 
