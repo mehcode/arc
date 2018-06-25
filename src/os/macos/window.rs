@@ -10,7 +10,7 @@ use objc_id::Id;
 pub(crate) struct Window(pub(crate) Id<Object>);
 
 impl Window {
-    pub(crate) fn new(width: f64, height: f64) -> Self {
+    pub(crate) fn new(width: f32, height: f32) -> Self {
         let style = NSWindowStyleMask::NSTitledWindowMask
             | NSWindowStyleMask::NSClosableWindowMask
             | NSWindowStyleMask::NSResizableWindowMask
@@ -18,7 +18,7 @@ impl Window {
 
         let window = unsafe {
             NSWindow::alloc(nil).initWithContentRect_styleMask_backing_defer_(
-                NSRect::new(NSPoint::new(0.0, 0.0), NSSize::new(width, height)),
+                NSRect::new(NSPoint::new(0.0, 0.0), NSSize::new(f64::from(width), f64::from(height))),
                 style,
                 NSBackingStoreType::NSBackingStoreBuffered,
                 YES,

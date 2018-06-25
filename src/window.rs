@@ -6,7 +6,7 @@ pub struct Window {
 }
 
 impl Window {
-    pub fn new(context: &Context, width: f64, height: f64) -> Self {
+    pub fn new(context: &Context, width: f32, height: f32) -> Self {
         Self {
             context: context.clone(),
             inner: os::Window::new(width, height),
