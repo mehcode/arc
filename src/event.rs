@@ -1,4 +1,3 @@
-
 pub struct Event<T> {
     handlers: Vec<Box<Fn(&T) -> () + Send + 'static>>,
 }

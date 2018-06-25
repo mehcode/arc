@@ -58,6 +58,18 @@ impl View {
     pub fn mouse_down(&mut self) -> &mut Event<events::MouseDown> {
         self.inner.mouse_down()
     }
+    
+    pub fn mouse_up(&mut self) -> &mut Event<events::MouseUp> {
+        self.inner.mouse_up()
+    }
+
+    pub fn mouse_enter(&mut self) -> &mut Event<events::MouseEnter> {
+        self.inner.mouse_enter()
+    }
+
+    pub fn mouse_leave(&mut self) -> &mut Event<events::MouseLeave> {
+        self.inner.mouse_leave()
+    }
 }
 
 //

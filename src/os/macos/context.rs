@@ -5,11 +5,13 @@ use cocoa::{
         NSApplicationActivationPolicy, NSApplicationActivationPolicyProhibited,
         NSApplicationActivationPolicyRegular, NSMenu, NSMenuItem, NSRunningApplication,
     },
-    base::{class, id, nil, YES}, foundation::{NSAutoreleasePool, NSProcessInfo, NSString},
+    base::{class, id, nil, YES},
+    foundation::{NSAutoreleasePool, NSProcessInfo, NSString},
 };
 use dispatch;
 use objc::{
-    declare::ClassDecl, runtime::{Class, Object, Sel, BOOL},
+    declare::ClassDecl,
+    runtime::{Class, Object, Sel, BOOL},
 };
 use std::cell::Cell;
 

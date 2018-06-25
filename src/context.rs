@@ -1,10 +1,10 @@
-use super::os;
-use super::View;
-use super::Window;
+use super::{os, View, Window};
 use fnv::FnvHashMap;
 use parking_lot::{Mutex, RwLock};
-use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::Arc;
+use std::sync::{
+    atomic::{AtomicUsize, Ordering},
+    Arc,
+};
 
 #[derive(Clone)]
 pub struct Context {

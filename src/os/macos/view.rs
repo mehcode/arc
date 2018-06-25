@@ -1,12 +1,14 @@
-use super::super::super::{events, Color, Event};
-use cocoa::appkit::NSEvent;
-use cocoa::base::{class, id, YES};
-use cocoa::foundation::{NSPoint, NSRect, NSSize, NSUInteger};
-use objc::{
-    declare::ClassDecl, runtime::{Class, Object, Sel, BOOL},
+use super::super::super::{Color, Event, MouseButton, MouseDown, MouseUp, MouseEnter, MouseLeave, Point};
+use cocoa::{
+    appkit::NSEvent,
+    base::{class, id, YES},
+    foundation::{NSPoint, NSRect, NSSize, NSUInteger},
 };
-use std::os::raw::c_void;
-use std::ptr::null_mut;
+use objc::{
+    declare::ClassDecl,
+    runtime::{Class, Object, Sel, BOOL},
+};
+use std::{os::raw::c_void, ptr::null_mut};
 use yoga_sys::{
     YGDirection, YGNodeCalculateLayout, YGNodeFreeRecursive, YGNodeGetChildCount, YGNodeGetParent,
     YGNodeInsertChild, YGNodeLayoutGetHeight, YGNodeLayoutGetLeft, YGNodeLayoutGetTop,
@@ -73,8 +75,20 @@ impl View {
         }
     }
 
-    pub(crate) fn mouse_down(&mut self) -> &mut Event<events::MouseDown> {
+    pub(crate) fn mouse_down(&mut self) -> &mut Event<MouseDown> {
         unsafe { &mut *(*(*self.0).get_mut_ivar::<*mut c_void>("sqEVTMouseDown") as *mut _) }
+    }
+
+    pub(crate) fn mouse_up(&mut self) -> &mut Event<MouseUp> {
+        unsafe { &mut *(*(*self.0).get_mut_ivar::<*mut c_void>("sqEVTMouseUp") as *mut _) }
+    }
+
+    pub(crate) fn mouse_enter(&mut self) -> &mut Event<MouseEnter> {
+        unsafe { &mut *(*(*self.0).get_mut_ivar::<*mut c_void>("sqEVTMouseEnter") as *mut _) }
+    }
+
+    pub(crate) fn mouse_leave(&mut self) -> &mut Event<MouseLeave> {
+        unsafe { &mut *(*(*self.0).get_mut_ivar::<*mut c_void>("sqEVTMouseLeave") as *mut _) }
     }
 }
 
@@ -114,6 +128,9 @@ fn declare() -> &'static Class {
         // Events (ivar)
 
         cls_decl.add_ivar::<*mut c_void>("sqEVTMouseDown");
+        cls_decl.add_ivar::<*mut c_void>("sqEVTMouseUp");
+        cls_decl.add_ivar::<*mut c_void>("sqEVTMouseEnter");
+        cls_decl.add_ivar::<*mut c_void>("sqEVTMouseLeave");
 
         // Methods
 
@@ -158,6 +175,31 @@ fn declare() -> &'static Class {
             sel!(otherMouseDown:),
             mouse_down as extern "C" fn(_: &Object, _: Sel, _: id),
         );
+
+        cls_decl.add_method(
+            sel!(mouseUp:),
+            mouse_up as extern "C" fn(_: &Object, _: Sel, _: id),
+        );
+
+        cls_decl.add_method(
+            sel!(rightMouseUp:),
+            mouse_up as extern "C" fn(_: &Object, _: Sel, _: id),
+        );
+
+        cls_decl.add_method(
+            sel!(otherMouseUp:),
+            mouse_up as extern "C" fn(_: &Object, _: Sel, _: id),
+        );
+
+        cls_decl.add_method(
+            sel!(mouseEnter:),
+            mouse_enter as extern "C" fn(_: &Object, _: Sel, _: id),
+        );
+
+        cls_decl.add_method(
+            sel!(mouseLeave:),
+            mouse_leave as extern "C" fn(_: &Object, _: Sel, _: id),
+        );
     }
 
     cls_decl.register()
@@ -174,9 +216,25 @@ extern "C" fn init(this: &Object, _: Sel) -> id {
 
         // Events
         // TODO: Init these on demand
+        
         (*this).set_ivar(
             "sqEVTMouseDown",
-            Box::into_raw(Box::new(Event::<events::MouseDown>::new())) as *mut c_void,
+            Box::into_raw(Box::new(Event::<MouseDown>::new())) as *mut c_void,
+        );
+        
+        (*this).set_ivar(
+            "sqEVTMouseUp",
+            Box::into_raw(Box::new(Event::<MouseUp>::new())) as *mut c_void,
+        );
+        
+        (*this).set_ivar(
+            "sqEVTMouseEnter",
+            Box::into_raw(Box::new(Event::<MouseEnter>::new())) as *mut c_void,
+        );
+        
+        (*this).set_ivar(
+            "sqEVTMouseLeave",
+            Box::into_raw(Box::new(Event::<MouseLeave>::new())) as *mut c_void,
         );
 
         this
@@ -200,7 +258,19 @@ extern "C" fn dealloc(this: &Object, _: Sel) {
 
         // Events
         let _ = Box::from_raw(
-            *(*this).get_ivar::<*mut c_void>("sqEVTMouseDown") as *mut Event<events::MouseDown>
+            *(*this).get_ivar::<*mut c_void>("sqEVTMouseDown") as *mut Event<MouseDown>
+        );
+
+        let _ = Box::from_raw(
+            *(*this).get_ivar::<*mut c_void>("sqEVTMouseUp") as *mut Event<MouseUp>
+        );
+
+        let _ = Box::from_raw(
+            *(*this).get_ivar::<*mut c_void>("sqEVTMouseEnter") as *mut Event<MouseEnter>
+        );
+
+        let _ = Box::from_raw(
+            *(*this).get_ivar::<*mut c_void>("sqEVTMouseLeave") as *mut Event<MouseLeave>
         );
 
         // Release the stored NSColor for background color
@@ -284,26 +354,62 @@ extern "C" fn update_layer(this: &Object, _: Sel) {
 
 extern "C" fn mouse_down(this: &Object, _: Sel, native_event: id) {
     unsafe {
-        let event =
-            &*(*(*this).get_ivar::<*mut c_void>("sqEVTMouseDown") as *mut Event<events::MouseDown>);
+        let event = &*(*(*this).get_ivar::<*mut c_void>("sqEVTMouseDown") as *mut Event<MouseDown>);
 
-        let button = match native_event.buttonNumber() {
-            0 => events::MouseButton::Left,
-            1 => events::MouseButton::Right,
-            2 => events::MouseButton::Middle,
-            other => events::MouseButton::Other(other as u8),
-        };
-
-        // Even though the NSView is declared to have flipped coordinates the NSEvent
-        // reports the location-in-window as (0,0) in bottom-left (we want top-left)
-        let window: id = msg_send![this, window];
-        let window_frame: NSRect = msg_send![window, contentLayoutRect];
-        let mut location = native_event.locationInWindow();
-        location.y = window_frame.size.height - location.y;
-
-        event.dispatch(events::MouseDown {
-            location: (location.x as f32, location.y as f32),
-            button,
+        event.dispatch(MouseDown {
+            location: location_in_window(this, native_event),
+            button: mouse_button(native_event),
         });
     }
+}
+
+extern "C" fn mouse_up(this: &Object, _: Sel, native_event: id) {
+    unsafe {
+        let event = &*(*(*this).get_ivar::<*mut c_void>("sqEVTMouseUp") as *mut Event<MouseUp>);
+
+        event.dispatch(MouseUp {
+            location: location_in_window(this, native_event),
+            button: mouse_button(native_event),
+        });
+    }
+}
+
+extern "C" fn mouse_enter(this: &Object, _: Sel, native_event: id) {
+    unsafe {
+        let event = &*(*(*this).get_ivar::<*mut c_void>("sqEVTMouseEnter") as *mut Event<MouseEnter>);
+
+        event.dispatch(MouseEnter {
+            location: location_in_window(this, native_event),
+        });
+    }
+}
+
+extern "C" fn mouse_leave(this: &Object, _: Sel, native_event: id) {
+    unsafe {
+        let event = &*(*(*this).get_ivar::<*mut c_void>("sqEVTMouseLeave") as *mut Event<MouseLeave>);
+
+        event.dispatch(MouseLeave {
+            location: location_in_window(this, native_event),
+        });
+    }
+}
+
+fn mouse_button(event: id) -> MouseButton {
+    match unsafe { event.buttonNumber() } {
+        0 => MouseButton::Left,
+        1 => MouseButton::Right,
+        2 => MouseButton::Middle,
+        other => MouseButton::Other(other as u8),
+    }
+}
+
+fn location_in_window(this: &Object, event: id) -> Point {
+    // Even though the NSView is declared to have flipped coordinates the NSEvent
+    // reports the location-in-window as (0,0) in bottom-left (we want top-left)
+    let window: id = unsafe { msg_send![this, window] };
+    let window_frame: NSRect = unsafe { msg_send![window, contentLayoutRect] };
+    let mut location = unsafe { event.locationInWindow() };
+    location.y = window_frame.size.height - location.y;
+
+    Point::new(location.x as f32, location.y as f32)
 }

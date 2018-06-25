@@ -1,7 +1,7 @@
-use super::super::super::Color;
-use super::View;
+use super::{super::super::Color, View};
 use cocoa::{
-    appkit::{NSBackingStoreType, NSWindow, NSWindowStyleMask}, base::{class, id, nil, NO, YES},
+    appkit::{NSBackingStoreType, NSWindow, NSWindowStyleMask},
+    base::{class, id, nil, NO, YES},
     foundation::{NSPoint, NSRect, NSSize, NSString},
 };
 use objc::runtime::Object;
