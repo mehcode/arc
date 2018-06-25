@@ -46,7 +46,7 @@ impl View {
         let inner = child.inner.clone();
         context.emplace_node(child);
 
-        self.inner.add_child(inner);
+        self.inner.add(inner);
     }
 }
 

@@ -34,7 +34,7 @@ impl View {
         View(view)
     }
 
-    pub(crate) fn add_child(&mut self, view: View) {
+    pub(crate) fn add(&mut self, view: View) {
         unsafe {
             // Add the node as a subnode (in yoga)
             let parent_node = *(*self.0).get_ivar::<*mut c_void>("sqYGNode") as YGNodeRef;
@@ -59,6 +59,8 @@ impl View {
         }
     }
 
+    // Style
+
     pub(crate) fn set_background_color(&mut self, color: Color) {
         unsafe {
             let color: id = msg_send![class("NSColor"), 
@@ -82,6 +84,8 @@ impl View {
             (*self.0).set_ivar("sqCornerRadius", f64::from(radius));
         }
     }
+
+    // Events
 
     pub(crate) fn mouse_down(&mut self) -> &mut Event<MouseDown> {
         unsafe { &mut *(*(*self.0).get_mut_ivar::<*mut c_void>("sqEVTMouseDown") as *mut _) }
