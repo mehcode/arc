@@ -58,7 +58,7 @@ impl View {
     pub fn mouse_down(&mut self) -> &mut Event<events::MouseDown> {
         self.inner.mouse_down()
     }
-    
+
     pub fn mouse_up(&mut self) -> &mut Event<events::MouseUp> {
         self.inner.mouse_up()
     }
@@ -82,6 +82,13 @@ impl View {
     /// Default: `transparent` (`0x00_00_00_00`)
     pub fn set_background_color(&mut self, color: impl Into<Color>) {
         self.inner.set_background_color(color.into());
+    }
+
+    /// Sets the corner radius for this view.
+    ///
+    /// Default: `0`
+    pub fn set_corner_radius(&mut self, radius: f32) {
+        self.inner.set_corner_radius(radius);
     }
 
     /// Sets the position type for this View which determines how it is positioned

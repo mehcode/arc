@@ -1,4 +1,6 @@
-use super::super::super::{Color, Event, MouseButton, MouseDown, MouseUp, MouseEnter, MouseLeave, Point};
+use super::super::super::{
+    Color, Event, MouseButton, MouseDown, MouseEnter, MouseLeave, MouseUp, Point,
+};
 use cocoa::{
     appkit::NSEvent,
     base::{class, id, YES},
@@ -75,6 +77,12 @@ impl View {
         }
     }
 
+    pub(crate) fn set_corner_radius(&mut self, radius: f32) {
+        unsafe {
+            (*self.0).set_ivar("sqCornerRadius", f64::from(radius));
+        }
+    }
+
     pub(crate) fn mouse_down(&mut self) -> &mut Event<MouseDown> {
         unsafe { &mut *(*(*self.0).get_mut_ivar::<*mut c_void>("sqEVTMouseDown") as *mut _) }
     }
@@ -124,6 +132,9 @@ fn declare() -> &'static Class {
 
         // Background Color (ivar)
         cls_decl.add_ivar::<id>("sqBackgroundColor");
+
+        // Corner Radius (ivar)
+        cls_decl.add_ivar::<f64>("sqCornerRadius");
 
         // Events (ivar)
 
@@ -216,22 +227,22 @@ extern "C" fn init(this: &Object, _: Sel) -> id {
 
         // Events
         // TODO: Init these on demand
-        
+
         (*this).set_ivar(
             "sqEVTMouseDown",
             Box::into_raw(Box::new(Event::<MouseDown>::new())) as *mut c_void,
         );
-        
+
         (*this).set_ivar(
             "sqEVTMouseUp",
             Box::into_raw(Box::new(Event::<MouseUp>::new())) as *mut c_void,
         );
-        
+
         (*this).set_ivar(
             "sqEVTMouseEnter",
             Box::into_raw(Box::new(Event::<MouseEnter>::new())) as *mut c_void,
         );
-        
+
         (*this).set_ivar(
             "sqEVTMouseLeave",
             Box::into_raw(Box::new(Event::<MouseLeave>::new())) as *mut c_void,
@@ -261,9 +272,8 @@ extern "C" fn dealloc(this: &Object, _: Sel) {
             *(*this).get_ivar::<*mut c_void>("sqEVTMouseDown") as *mut Event<MouseDown>
         );
 
-        let _ = Box::from_raw(
-            *(*this).get_ivar::<*mut c_void>("sqEVTMouseUp") as *mut Event<MouseUp>
-        );
+        let _ =
+            Box::from_raw(*(*this).get_ivar::<*mut c_void>("sqEVTMouseUp") as *mut Event<MouseUp>);
 
         let _ = Box::from_raw(
             *(*this).get_ivar::<*mut c_void>("sqEVTMouseEnter") as *mut Event<MouseEnter>
@@ -342,13 +352,18 @@ extern "C" fn resize_subviews_with_old_size(this: &Object, _: Sel, _: NSSize) {
 
 extern "C" fn update_layer(this: &Object, _: Sel) {
     unsafe {
+        let layer: id = msg_send![this, layer];
+
         let background_color: &id = (*this).get_ivar::<id>("sqBackgroundColor");
         if !background_color.is_null() {
             let background_color: id = msg_send![*background_color, CGColor];
 
-            let layer: id = msg_send![this, layer];
             msg_send![layer, setBackgroundColor: background_color];
         }
+
+        let corner_radius: f64 = *(*this).get_ivar("sqCornerRadius");
+        msg_send![layer, setCornerRadius: corner_radius];
+        msg_send![layer, setMasksToBounds: YES];
     }
 }
 
@@ -376,7 +391,8 @@ extern "C" fn mouse_up(this: &Object, _: Sel, native_event: id) {
 
 extern "C" fn mouse_enter(this: &Object, _: Sel, native_event: id) {
     unsafe {
-        let event = &*(*(*this).get_ivar::<*mut c_void>("sqEVTMouseEnter") as *mut Event<MouseEnter>);
+        let event =
+            &*(*(*this).get_ivar::<*mut c_void>("sqEVTMouseEnter") as *mut Event<MouseEnter>);
 
         event.dispatch(MouseEnter {
             location: location_in_window(this, native_event),
@@ -386,7 +402,8 @@ extern "C" fn mouse_enter(this: &Object, _: Sel, native_event: id) {
 
 extern "C" fn mouse_leave(this: &Object, _: Sel, native_event: id) {
     unsafe {
-        let event = &*(*(*this).get_ivar::<*mut c_void>("sqEVTMouseLeave") as *mut Event<MouseLeave>);
+        let event =
+            &*(*(*this).get_ivar::<*mut c_void>("sqEVTMouseLeave") as *mut Event<MouseLeave>);
 
         event.dispatch(MouseLeave {
             location: location_in_window(this, native_event),
