@@ -1,5 +1,6 @@
 use super::{
-    events, os, Align, Color, Context, Edge, Event, FlexDirection, Justify, PositionType, Wrap,
+    context::WeakContext, events, os, Align, Color, Context, Edge, Event, FlexDirection, Justify,
+    PositionType, Wrap,
 };
 use yoga_sys::{
     YGNodeStyleSetAlignContent, YGNodeStyleSetAlignItems, YGNodeStyleSetAlignSelf,
@@ -20,6 +21,7 @@ use yoga_sys::{
 pub struct View {
     pub(crate) id: usize,
     pub(crate) inner: os::View,
+    pub(crate) context: WeakContext,
 }
 
 impl View {
@@ -27,6 +29,7 @@ impl View {
         Self {
             id: context.next_id(),
             inner: os::View::new(),
+            context: context.downgrade(),
         }
     }
 
@@ -42,11 +45,13 @@ impl View {
 //
 
 impl View {
-    pub fn add(&mut self, context: &Context, child: View) {
-        let inner = child.inner.clone();
-        context.emplace_node(child);
+    pub fn add(&mut self, child: View) {
+        if let Some(context) = self.context.upgrade() {
+            let inner = child.inner.clone();
+            context.emplace_node(child);
 
-        self.inner.add(inner);
+            self.inner.add(inner);
+        }
     }
 }
 

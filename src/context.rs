@@ -3,7 +3,7 @@ use fnv::FnvHashMap;
 use parking_lot::{Mutex, RwLock};
 use std::sync::{
     atomic::{AtomicUsize, Ordering},
-    Arc,
+    Arc, Weak,
 };
 
 #[derive(Clone)]
@@ -33,6 +33,12 @@ impl Context {
         }
     }
 
+    pub(crate) fn downgrade(&self) -> WeakContext {
+        WeakContext {
+            inner: Arc::downgrade(&self.inner),
+        }
+    }
+
     pub fn add_window(&self, window: Window) {
         let _guard = self.inner.lock.lock();
         self.inner.inner.add_window(window.inner);
@@ -59,5 +65,18 @@ impl Context {
         let id = node.id;
         self.inner.nodes.write().insert(id, node);
         id
+    }
+}
+
+#[derive(Clone)]
+pub(crate) struct WeakContext {
+    inner: Weak<InnerContext>,
+}
+
+impl WeakContext {
+    pub(crate) fn upgrade(&self) -> Option<Context> {
+        Some(Context {
+            inner: self.inner.upgrade()?,
+        })
     }
 }
