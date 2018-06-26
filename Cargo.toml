@@ -10,8 +10,7 @@ identifier = "io.mehcode.square.example.layout"
 
 [dependencies]
 lazy_static = "1"
-palette = { version = "0.4", default-features = false }
-yoga-sys = { git = "https://github.com/mehcode/yoga-sys", rev = "4efbc570ccf351dc73273323b653fa1188de88c0" } 
+yoga-sys = { git = "https://github.com/mehcode/yoga-sys", rev = "4efbc570ccf351dc73273323b653fa1188de88c0" }
 fnv = "1.0.3"
 parking_lot = "0.6"
 

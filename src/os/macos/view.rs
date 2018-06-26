@@ -63,11 +63,11 @@ impl View {
 
     pub(crate) fn set_background_color(&mut self, color: Color) {
         unsafe {
-            let color: id = msg_send![class("NSColor"), 
-                colorWithRed: color.inner.red as f64
-                       green: color.inner.green as f64
-                        blue: color.inner.blue as f64
-                       alpha: color.inner.alpha as f64];
+            let color: id = msg_send![class("NSColor"),
+                colorWithRed: color.red as f64
+                       green: color.green as f64
+                        blue: color.blue as f64
+                       alpha: color.alpha as f64];
 
             msg_send![color, retain];
 

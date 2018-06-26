@@ -1,7 +1,6 @@
 #[macro_use]
 extern crate lazy_static;
 extern crate fnv;
-extern crate palette;
 extern crate parking_lot;
 extern crate yoga_sys;
 
