@@ -20,58 +20,58 @@ fn main() {
     row1.set_margin(Edge::Vertical, PADDING);
     row1.set_flex_direction(FlexDirection::Row);
     row1.set_flex_basis(75.);
-    row1.add(&c, op_button(&c, Operator::Clear));
-    row1.add(&c, op_button(&c, Operator::InvertSign));
-    row1.add(&c, op_button(&c, Operator::Percent));
-    row1.add(&c, op_button(&c, Operator::Divide));
+    row1.add(op_button(&c, Operator::Clear));
+    row1.add(op_button(&c, Operator::InvertSign));
+    row1.add(op_button(&c, Operator::Percent));
+    row1.add(op_button(&c, Operator::Divide));
 
     let mut row2 = View::new(&c);
     row2.set_margin(Edge::Vertical, PADDING);
     row2.set_flex_direction(FlexDirection::Row);
     row2.set_flex_basis(75.);
-    row2.add(&c, digit_button(&c, 7));
-    row2.add(&c, digit_button(&c, 8));
-    row2.add(&c, digit_button(&c, 9));
-    row2.add(&c, op_button(&c, Operator::Multiply));
+    row2.add(digit_button(&c, 7));
+    row2.add(digit_button(&c, 8));
+    row2.add(digit_button(&c, 9));
+    row2.add(op_button(&c, Operator::Multiply));
 
     let mut row3 = View::new(&c);
     row3.set_margin(Edge::Vertical, PADDING);
     row3.set_flex_direction(FlexDirection::Row);
     row3.set_flex_basis(75.);
-    row3.add(&c, digit_button(&c, 4));
-    row3.add(&c, digit_button(&c, 5));
-    row3.add(&c, digit_button(&c, 6));
-    row3.add(&c, op_button(&c, Operator::Subtract));
+    row3.add(digit_button(&c, 4));
+    row3.add(digit_button(&c, 5));
+    row3.add(digit_button(&c, 6));
+    row3.add(op_button(&c, Operator::Subtract));
 
     let mut row4 = View::new(&c);
     row4.set_margin(Edge::Vertical, PADDING);
     row4.set_flex_direction(FlexDirection::Row);
     row4.set_flex_basis(75.);
-    row4.add(&c, digit_button(&c, 1));
-    row4.add(&c, digit_button(&c, 2));
-    row4.add(&c, digit_button(&c, 3));
-    row4.add(&c, op_button(&c, Operator::Add));
+    row4.add(digit_button(&c, 1));
+    row4.add(digit_button(&c, 2));
+    row4.add(digit_button(&c, 3));
+    row4.add(op_button(&c, Operator::Add));
 
     let mut row5 = View::new(&c);
     row5.set_margin(Edge::Vertical, PADDING);
     row5.set_flex_direction(FlexDirection::Row);
     row5.set_flex_basis(75.);
-    row5.add(&c, digit_button(&c, 0));
-    row5.add(&c, op_button(&c, Operator::Decimal));
-    row5.add(&c, op_button_2x(&c, Operator::Solve));
+    row5.add(digit_button(&c, 0));
+    row5.add(op_button(&c, Operator::Decimal));
+    row5.add(op_button_2x(&c, Operator::Solve));
 
     let mut panel = View::new(&c);
     panel.set_padding(Edge::All, PADDING);
-    panel.add(&c, row1);
-    panel.add(&c, row2);
-    panel.add(&c, row3);
-    panel.add(&c, row4);
-    panel.add(&c, row5);
+    panel.add(row1);
+    panel.add(row2);
+    panel.add(row3);
+    panel.add(row4);
+    panel.add(row5);
 
     let mut main = View::new(&c);
     main.set_background_color(0xffffffff);
-    main.add(&c, row0);
-    main.add(&c, panel);
+    main.add(row0);
+    main.add(panel);
 
     window.set_view(main);
 
