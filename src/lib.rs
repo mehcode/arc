@@ -1,8 +1,12 @@
 #[macro_use]
 extern crate lazy_static;
+
 extern crate fnv;
 extern crate parking_lot;
 extern crate yoga_sys;
+
+#[macro_use]
+extern crate downcast;
 
 #[cfg(target_os = "macos")]
 #[macro_use]
@@ -23,10 +27,11 @@ mod event;
 mod events;
 mod geometry;
 mod layout;
+mod node;
 mod os;
 mod view;
 mod window;
 
 pub use self::{
-    color::*, context::*, event::*, events::*, geometry::*, layout::*, view::*, window::*,
+    color::*, context::*, event::*, events::*, geometry::*, layout::*, node::*, view::*, window::*,
 };

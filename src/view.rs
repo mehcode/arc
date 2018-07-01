@@ -1,6 +1,6 @@
 use super::{
     context::WeakContext, events, os, Align, Color, Context, Edge, Event, FlexDirection, Justify,
-    PositionType, Wrap,
+    Node, NodeId, PositionType, Wrap,
 };
 use yoga_sys::{
     YGNodeStyleSetAlignContent, YGNodeStyleSetAlignItems, YGNodeStyleSetAlignSelf,
@@ -19,7 +19,7 @@ use yoga_sys::{
 /// `View` is designed to be nested inside other views and can have 0 to many children of
 /// any type.
 pub struct View {
-    pub(crate) id: usize,
+    pub(crate) id: NodeId,
     pub(crate) inner: os::View,
     pub(crate) context: WeakContext,
 }
@@ -32,11 +32,27 @@ impl View {
             context: context.downgrade(),
         }
     }
+}
 
-    /// Returns the context identifier associated with this node.
-    /// Can be used to access and/or mutate this at a later time.
-    pub fn id(&self) -> usize {
+//
+// Node
+//
+
+impl Node for View {
+    fn id(&self) -> NodeId {
         self.id
+    }
+}
+
+impl os::Node for View {
+    fn handle(&self) -> os::NodeHandle {
+        self.inner.handle()
+    }
+}
+
+impl From<View> for NodeId {
+    fn from(view: View) -> NodeId {
+        view.id()
     }
 }
 
@@ -45,12 +61,10 @@ impl View {
 //
 
 impl View {
-    pub fn add(&mut self, child: View) {
+    pub fn add(&mut self, node: impl Node) {
         if let Some(context) = self.context.upgrade() {
-            let inner = child.inner.clone();
-            context.emplace_node(child);
-
-            self.inner.add(inner);
+            self.inner.add(&node);
+            context.emplace_node(node);
         }
     }
 }

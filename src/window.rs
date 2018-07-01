@@ -1,4 +1,4 @@
-use super::{os, Color, Context, View};
+use super::{os, Color, Context, Node};
 
 pub struct Window {
     context: Context,
@@ -29,10 +29,8 @@ impl Window {
     }
 
     /// Set the root view of the window.
-    pub fn set_view(&mut self, node: View) {
-        let inner = node.inner.clone();
-        let _ = self.context.emplace_node(node);
-
-        self.inner.set_view(inner);
+    pub fn set_view(&mut self, node: impl Node + 'static) {
+        self.inner.set_view(&node);
+        self.context.emplace_node(node);
     }
 }

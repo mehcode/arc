@@ -25,26 +25,24 @@ impl Default for Color {
 //
 
 impl Color {
-    pub const BLACK: Color = Color {
-        red: 0.,
-        green: 0.,
-        blue: 0.,
-        alpha: 1.,
-    };
-
-    pub const WHITE: Color = Color {
-        red: 1.,
-        green: 1.,
-        blue: 1.,
-        alpha: 1.,
-    };
-    
     // TODO: Consider naming `CLEAR`
     pub const TRANSPARENT: Color = Color {
         red: 0.,
         green: 0.,
         blue: 0.,
         alpha: 0.,
+    };
+    pub const WHITE: Color = Color {
+        red: 1.,
+        green: 1.,
+        blue: 1.,
+        alpha: 1.,
+    };
+    pub const BLACK: Color = Color {
+        red: 0.,
+        green: 0.,
+        blue: 0.,
+        alpha: 1.,
     };
 }
 

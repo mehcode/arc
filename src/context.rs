@@ -1,4 +1,4 @@
-use super::{os, View, Window};
+use super::{os, Node, NodeId, Window};
 use fnv::FnvHashMap;
 use parking_lot::{Mutex, RwLock};
 use std::sync::{
@@ -14,7 +14,7 @@ pub struct Context {
 struct InnerContext {
     inner: os::Context,
     lock: Mutex<()>,
-    nodes: RwLock<FnvHashMap<usize, View>>,
+    nodes: RwLock<FnvHashMap<NodeId, Box<dyn Node>>>,
     next_node_id: AtomicUsize,
 }
 
@@ -49,22 +49,20 @@ impl Context {
         self.inner.inner.run();
     }
 
-    pub fn update_by_id(&self, id: usize, callback: impl FnOnce(&mut View) -> () + Send) {
+    pub fn update_by_id<T: Node>(&self, id: NodeId, callback: impl FnOnce(&mut T) -> () + Send) {
         if let Some(node) = self.inner.nodes.write().get_mut(&id) {
             self.inner.inner.execute_on_main_thread(move || {
-                callback(node);
+                callback(node.downcast_mut().expect("mismatched types in callback"));
             });
         }
     }
 
-    pub(crate) fn next_id(&self) -> usize {
-        self.inner.next_node_id.fetch_add(1, Ordering::Relaxed)
+    pub(crate) fn next_id(&self) -> NodeId {
+        NodeId(self.inner.next_node_id.fetch_add(1, Ordering::Relaxed))
     }
 
-    pub(crate) fn emplace_node(&self, node: View) -> usize {
-        let id = node.id;
-        self.inner.nodes.write().insert(id, node);
-        id
+    pub(crate) fn emplace_node(&self, node: impl Node + 'static) {
+        self.inner.nodes.write().insert(node.id(), Box::new(node));
     }
 }
 

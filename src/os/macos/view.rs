@@ -1,5 +1,6 @@
-use super::super::super::{
-    Color, Event, MouseButton, MouseDown, MouseEnter, MouseLeave, MouseUp, Point,
+use super::{
+    super::super::{Color, Event, MouseButton, MouseDown, MouseEnter, MouseLeave, MouseUp, Point},
+    Node,
 };
 use cocoa::{
     appkit::NSEvent,
@@ -34,17 +35,19 @@ impl View {
         View(view)
     }
 
-    pub(crate) fn add(&mut self, view: View) {
+    pub(crate) fn add(&mut self, node: &impl Node) {
         unsafe {
+            let handle = node.handle();
+
             // Add the node as a subnode (in yoga)
             let parent_node = *(*self.0).get_ivar::<*mut c_void>("sqYGNode") as YGNodeRef;
             let parent_children_count = YGNodeGetChildCount(parent_node);
-            let child_node = *(*view.0).get_ivar::<*mut c_void>("sqYGNode") as YGNodeRef;
+            let child_node = *(*handle).get_ivar::<*mut c_void>("sqYGNode") as YGNodeRef;
 
             YGNodeInsertChild(parent_node, child_node, parent_children_count);
 
             // Add the view as a subview (in ui)
-            msg_send![self.0, addSubview:view.0];
+            msg_send![self.0, addSubview: handle];
         }
     }
 
@@ -119,6 +122,12 @@ impl Drop for View {
         unsafe {
             msg_send![self.0, release];
         }
+    }
+}
+
+impl Node for View {
+    fn handle(&self) -> id {
+        self.0
     }
 }
 
@@ -373,7 +382,8 @@ extern "C" fn update_layer(this: &Object, _: Sel) {
 
 extern "C" fn mouse_down(this: &Object, _: Sel, native_event: id) {
     unsafe {
-        let event = &*(*(*this).get_ivar::<*mut c_void>("sqEVTMouseDown") as *mut Event<MouseDown>);
+        let event =
+            &mut *(*(*this).get_ivar::<*mut c_void>("sqEVTMouseDown") as *mut Event<MouseDown>);
 
         event.dispatch(MouseDown {
             location: location_in_window(this, native_event),
@@ -384,7 +394,7 @@ extern "C" fn mouse_down(this: &Object, _: Sel, native_event: id) {
 
 extern "C" fn mouse_up(this: &Object, _: Sel, native_event: id) {
     unsafe {
-        let event = &*(*(*this).get_ivar::<*mut c_void>("sqEVTMouseUp") as *mut Event<MouseUp>);
+        let event = &mut *(*(*this).get_ivar::<*mut c_void>("sqEVTMouseUp") as *mut Event<MouseUp>);
 
         event.dispatch(MouseUp {
             location: location_in_window(this, native_event),
@@ -396,7 +406,7 @@ extern "C" fn mouse_up(this: &Object, _: Sel, native_event: id) {
 extern "C" fn mouse_enter(this: &Object, _: Sel, native_event: id) {
     unsafe {
         let event =
-            &*(*(*this).get_ivar::<*mut c_void>("sqEVTMouseEnter") as *mut Event<MouseEnter>);
+            &mut *(*(*this).get_ivar::<*mut c_void>("sqEVTMouseEnter") as *mut Event<MouseEnter>);
 
         event.dispatch(MouseEnter {
             location: location_in_window(this, native_event),
@@ -407,7 +417,7 @@ extern "C" fn mouse_enter(this: &Object, _: Sel, native_event: id) {
 extern "C" fn mouse_leave(this: &Object, _: Sel, native_event: id) {
     unsafe {
         let event =
-            &*(*(*this).get_ivar::<*mut c_void>("sqEVTMouseLeave") as *mut Event<MouseLeave>);
+            &mut *(*(*this).get_ivar::<*mut c_void>("sqEVTMouseLeave") as *mut Event<MouseLeave>);
 
         event.dispatch(MouseLeave {
             location: location_in_window(this, native_event),

@@ -1,4 +1,4 @@
-use super::{super::super::Color, View};
+use super::{super::super::Color, Node};
 use cocoa::{
     appkit::{NSBackingStoreType, NSWindow, NSWindowStyleMask},
     base::{class, id, nil, NO, YES},
@@ -68,9 +68,9 @@ impl Window {
         }
     }
 
-    pub(crate) fn set_view(&mut self, view: View) {
+    pub(crate) fn set_view(&mut self, node: &impl Node) {
         unsafe {
-            msg_send![self.0, setContentView: &*view.0];
+            msg_send![self.0, setContentView: node.handle()];
         }
     }
 }
