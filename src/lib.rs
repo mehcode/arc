@@ -3,7 +3,7 @@ extern crate lazy_static;
 
 extern crate fnv;
 extern crate parking_lot;
-extern crate yoga_sys;
+extern crate yoga;
 
 #[macro_use]
 extern crate downcast;
@@ -26,12 +26,13 @@ mod context;
 mod event;
 mod events;
 mod geometry;
-mod layout;
 mod node;
 mod os;
 mod view;
 mod window;
 
+pub use yoga::{Align, Edge, FlexDirection, Justify, PositionType, Wrap};
+
 pub use self::{
-    color::*, context::*, event::*, events::*, geometry::*, layout::*, node::*, view::*, window::*,
+    color::*, context::*, event::*, events::*, geometry::*, node::*, view::*, window::*,
 };

@@ -11,12 +11,8 @@ use objc::{
     declare::ClassDecl,
     runtime::{Class, Object, Sel, BOOL},
 };
-use std::{os::raw::c_void, ptr::null_mut};
-use yoga_sys::{
-    YGDirection, YGNodeCalculateLayout, YGNodeFreeRecursive, YGNodeGetChildCount, YGNodeGetParent,
-    YGNodeInsertChild, YGNodeLayoutGetHeight, YGNodeLayoutGetLeft, YGNodeLayoutGetTop,
-    YGNodeLayoutGetWidth, YGNodeNew, YGNodeRef,
-};
+use std::{os::raw::c_void, ptr};
+use yoga;
 
 // TODO: Investigate ways to make this file more "safe"
 
@@ -27,6 +23,11 @@ pub(crate) struct View(pub(crate) id);
 //       public access is only allowed on main thread.
 unsafe impl Send for View {}
 
+// Accessor for a View's yoga node
+fn get_yoga_node(handle: id) -> &'static mut yoga::Node {
+    unsafe { &mut *(*(*handle).get_mut_ivar::<*mut c_void>("sqYGNode") as *mut _) }
+}
+
 impl View {
     pub(crate) fn new() -> Self {
         // Allocate and initialize an empty, native view
@@ -36,33 +37,40 @@ impl View {
     }
 
     pub(crate) fn add(&mut self, node: &impl Node) {
+        let this_node = self.yoga_node();
+        let this_node_children_count = this_node.child_count();
+
+        let incoming_handle = node.handle();
+        let incoming_node = get_yoga_node(incoming_handle);
+
+        // Add this node as a sub-node (in layout)
+        this_node.insert_child(incoming_node, this_node_children_count);
+
+        // Add the view as a sub-view (in ui)
         unsafe {
-            let handle = node.handle();
-
-            // Add the node as a subnode (in yoga)
-            let parent_node = *(*self.0).get_ivar::<*mut c_void>("sqYGNode") as YGNodeRef;
-            let parent_children_count = YGNodeGetChildCount(parent_node);
-            let child_node = *(*handle).get_ivar::<*mut c_void>("sqYGNode") as YGNodeRef;
-
-            YGNodeInsertChild(parent_node, child_node, parent_children_count);
-
-            // Add the view as a subview (in ui)
-            msg_send![self.0, addSubview: handle];
+            msg_send![self.0, addSubview: incoming_handle];
         }
     }
 
-    pub(crate) unsafe fn yoga_node(&self) -> YGNodeRef {
-        *(*self.0).get_ivar::<*mut c_void>("sqYGNode") as YGNodeRef
+    pub(crate) fn yoga_node(&mut self) -> &mut yoga::Node {
+        get_yoga_node(self.0)
     }
 
     /// Inform the view that a layout pass is needed before the next draw.
     pub(crate) fn set_needs_layout(&mut self) {
         unsafe {
-            msg_send![self.0, setNeedsLayout: YES];
+            // NOTE: Currently there is no way to re-layout just 1 area in a window.
+
+            let window: id = msg_send![self.0, window];
+            let window_content_view: id = msg_send![window, contentView];
+
+            msg_send![window_content_view, setNeedsLayout: YES];
         }
     }
 
+    //
     // Style
+    //
 
     pub(crate) fn set_background_color(&mut self, color: Color) {
         unsafe {
@@ -88,7 +96,9 @@ impl View {
         }
     }
 
+    //
     // Events
+    //
 
     pub(crate) fn mouse_down(&mut self) -> &mut Event<MouseDown> {
         unsafe { &mut *(*(*self.0).get_mut_ivar::<*mut c_void>("sqEVTMouseDown") as *mut _) }
@@ -166,11 +176,9 @@ fn declare() -> &'static Class {
             is_flipped as extern "C" fn(_: &Object, _: Sel) -> BOOL,
         );
 
-        cls_decl.add_method(sel!(layout), layout as extern "C" fn(_: &Object, _: Sel));
-
         cls_decl.add_method(
-            sel!(resizeSubviewsWithOldSize:),
-            resize_subviews_with_old_size as extern "C" fn(_: &Object, _: Sel, _: NSSize),
+            sel!(layout),
+            layout as extern "C" fn(_: &mut Object, _: Sel),
         );
 
         cls_decl.add_method(
@@ -232,11 +240,16 @@ fn declare() -> &'static Class {
 extern "C" fn init(this: &Object, _: Sel) -> id {
     unsafe {
         // Superclass
+
         let super_cls = Class::get("NSView").unwrap();
         let this: id = msg_send![super(this, super_cls), init];
 
-        // Yoga node (for layout)
-        (*this).set_ivar("sqYGNode", YGNodeNew() as *mut c_void);
+        // Yoga node (layout)
+
+        (*this).set_ivar(
+            "sqYGNode",
+            Box::into_raw(Box::new(yoga::Node::new())) as *mut c_void,
+        );
 
         // Events
         // TODO: Init these on demand
@@ -272,15 +285,15 @@ extern "C" fn dealloc(this: &Object, _: Sel) {
         for _ in 0..subviews_count {
             let subview: id = msg_send![subviews, objectAtIndex: 0];
 
-            // Unset yoga node (we release all yoga nodes at once)
-            (*subview).set_ivar::<*mut c_void>("sqYGNode", null_mut());
-
             // Remove and release subview
             msg_send![subview, removeFromSuperview];
             msg_send![subview, release];
         }
 
+        //
         // Events
+        //
+
         let _ = Box::from_raw(
             *(*this).get_ivar::<*mut c_void>("sqEVTMouseDown") as *mut Event<MouseDown>
         );
@@ -297,48 +310,64 @@ extern "C" fn dealloc(this: &Object, _: Sel) {
         );
 
         // Release the stored NSColor for background color
+
         let background_color: &id = (*this).get_ivar::<id>("sqBackgroundColor");
         if !background_color.is_null() {
             msg_send![*background_color, release];
         }
 
-        // Free the yoga tree IF we are the root node
-        let node = *(*this).get_ivar::<*mut c_void>("sqYGNode") as YGNodeRef;
-        if !node.is_null() {
-            let parent_node = YGNodeGetParent(node);
-            if parent_node.is_null() {
-                YGNodeFreeRecursive(node);
-            }
+        // Free the yoga node (layout)
+
+        let _ = Box::from_raw(*(*this).get_ivar::<*mut c_void>("sqYGNode") as *mut yoga::Node);
+    }
+}
+
+fn yoga_apply_layout_to_view_hierarchy(view: id) {
+    let node = get_yoga_node(view);
+
+    let x = f64::from(node.get_layout_left());
+    let y = f64::from(node.get_layout_top());
+
+    let width = f64::from(node.get_layout_width());
+    let height = f64::from(node.get_layout_height());
+
+    let frame = NSRect::new(NSPoint::new(x, y), NSSize::new(width, height));
+
+    unsafe {
+        msg_send![view, setFrame: frame];
+
+        let subviews: id = msg_send![view, subviews];
+        let subviews_count: NSUInteger = msg_send![subviews, count];
+
+        for i in 0..subviews_count {
+            let subview: id = msg_send![subviews, objectAtIndex: i];
+
+            yoga_apply_layout_to_view_hierarchy(subview);
         }
     }
 }
 
-extern "C" fn layout(this: &Object, _: Sel) {
+extern "C" fn layout(this: &mut Object, _: Sel) {
     unsafe {
-        // Run our superclass layout
-        let super_cls = Class::get("NSView").unwrap();
-        msg_send![super(this, super_cls), layout];
+        let window: id = msg_send![this, window];
+        let window_content_view: id = msg_send![window, contentView];
+        let is_root = ptr::eq(window_content_view, this);
 
-        // Calculate layout for yoga tree if at root
-        let node = *(*this).get_ivar::<*mut c_void>("sqYGNode") as YGNodeRef;
-        let parent_node = YGNodeGetParent(node);
+        if is_root {
+            let bounds: NSRect = msg_send![this, frame];
+            let node = get_yoga_node(&mut *this);
 
-        if parent_node.is_null() {
-            let frame: NSRect = msg_send![this, frame];
-            let frame_width = frame.size.width as f32;
-            let frame_height = frame.size.height as f32;
+            // Calculate layout for tree (if at root)
+            node.calculate_layout(
+                bounds.size.width as f32,
+                bounds.size.height as f32,
+                yoga::Direction::LTR,
+            );
 
-            YGNodeCalculateLayout(node, frame_width, frame_height, YGDirection::YGDirectionLTR);
+            // Apply layout to view hierarchy
+            yoga_apply_layout_to_view_hierarchy(this);
         } else {
-            // Apply layout
-            let left = YGNodeLayoutGetLeft(node) as f64;
-            let top = YGNodeLayoutGetTop(node) as f64;
-            let width = YGNodeLayoutGetWidth(node) as f64;
-            let height = YGNodeLayoutGetHeight(node) as f64;
-
-            let frame = NSRect::new(NSPoint::new(left, top), NSSize::new(width, height));
-
-            msg_send![this, setFrame: frame];
+            return;
         }
     }
 }
@@ -349,18 +378,6 @@ extern "C" fn is_flipped(_: &Object, _: Sel) -> BOOL {
 
 extern "C" fn wants_update_layer(_: &Object, _: Sel) -> BOOL {
     YES
-}
-
-extern "C" fn resize_subviews_with_old_size(this: &Object, _: Sel, _: NSSize) {
-    unsafe {
-        let subviews: id = msg_send![this, subviews];
-        let subviews_count: NSUInteger = msg_send![subviews, count];
-        for i in 0..subviews_count {
-            let subview: id = msg_send![subviews, objectAtIndex: i];
-
-            msg_send![subview, setNeedsLayout: YES];
-        }
-    }
 }
 
 extern "C" fn update_layer(this: &Object, _: Sel) {

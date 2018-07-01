@@ -8,9 +8,13 @@ description = ""
 name = "Layout"
 identifier = "io.mehcode.square.example.layout"
 
+[package.metadata.bundle.example.calculator]
+name = "Calculator"
+identifier = "io.mehcode.square.example.calculator"
+
 [dependencies]
 lazy_static = "1"
-yoga-sys = { git = "https://github.com/mehcode/yoga-sys", rev = "4efbc570ccf351dc73273323b653fa1188de88c0" }
+yoga = "0.2"
 fnv = "1.0.3"
 parking_lot = "0.6"
 downcast = "0.9.2"
