@@ -18,9 +18,6 @@ extern crate cocoa;
 #[cfg(target_os = "macos")]
 extern crate dispatch;
 
-#[cfg(target_os = "macos")]
-extern crate objc_id;
-
 mod color;
 mod context;
 mod event;

@@ -4,10 +4,8 @@ use cocoa::{
     base::{class, id, nil, NO, YES},
     foundation::{NSPoint, NSRect, NSSize, NSString},
 };
-use objc::runtime::Object;
-use objc_id::Id;
 
-pub(crate) struct Window(pub(crate) Id<Object>);
+pub(crate) struct Window(pub(crate) id);
 
 impl Window {
     pub(crate) fn new(width: f32, height: f32) -> Self {
@@ -36,7 +34,7 @@ impl Window {
             window.center();
         }
 
-        Window(unsafe { Id::from_retained_ptr(window) })
+        Window(window)
     }
 
     pub(crate) fn set_title(&mut self, title: &str) {
@@ -71,6 +69,14 @@ impl Window {
     pub(crate) fn set_view(&mut self, node: &impl Node) {
         unsafe {
             msg_send![self.0, setContentView: node.handle()];
+        }
+    }
+}
+
+impl Drop for Window {
+    fn drop(&mut self) {
+        unsafe {
+            msg_send![self.0, release];
         }
     }
 }
