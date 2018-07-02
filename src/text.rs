@@ -5,23 +5,17 @@ use super::{
 use super::os::Node as OsNode;
 use yoga;
 
-/// The fundamental component, `View` is a container that supports
-/// layout with **Flexbox** powered by [Yoga](https://yogalayout.com/). View maps directly
-/// to the native view equivalent of the platform (e.g.. `NSView` for macOS).
-///
-/// `View` is designed to be nested inside other views and can have 0 to many children of
-/// any type.
-pub struct View {
+pub struct Text {
     pub(crate) id: NodeId,
-    pub(crate) inner: os::View,
+    pub(crate) inner: os::Text,
     pub(crate) context: WeakContext,
 }
 
-impl View {
+impl Text {
     pub fn new(context: &Context) -> Self {
         Self {
             id: context.next_id(),
-            inner: os::View::new(),
+            inner: os::Text::new(),
             context: context.downgrade(),
         }
     }
@@ -31,78 +25,29 @@ impl View {
 // Node
 //
 
-impl Node for View {
+impl Node for Text {
     fn id(&self) -> NodeId {
         self.id
     }
 }
 
-impl os::Node for View {
+impl os::Node for Text {
     fn handle(&self) -> os::NodeHandle {
         self.inner.handle()
     }
 }
 
-impl From<View> for NodeId {
-    fn from(view: View) -> NodeId {
-        view.id()
+impl From<Text> for NodeId {
+    fn from(node: Text) -> NodeId {
+        node.id()
     }
 }
 
 //
-// Container
+// Layout (Item)
 //
 
-impl View {
-    pub fn add(&mut self, node: impl Node) {
-        if let Some(context) = self.context.upgrade() {
-            self.inner.add(&node);
-            context.emplace_node(node);
-        }
-    }
-}
-
-//
-// Events
-//
-
-impl View {
-    pub fn mouse_down(&mut self) -> &mut Event<events::MouseDown> {
-        self.inner.mouse_down()
-    }
-
-    pub fn mouse_up(&mut self) -> &mut Event<events::MouseUp> {
-        self.inner.mouse_up()
-    }
-
-    pub fn mouse_enter(&mut self) -> &mut Event<events::MouseEnter> {
-        self.inner.mouse_enter()
-    }
-
-    pub fn mouse_leave(&mut self) -> &mut Event<events::MouseLeave> {
-        self.inner.mouse_leave()
-    }
-}
-
-//
-// Style
-//
-
-impl View {
-    /// Sets the background color for this view.
-    ///
-    /// Default: `transparent` (`0x00_00_00_00`)
-    pub fn set_background_color(&mut self, color: impl Into<Color>) {
-        self.inner.set_background_color(color.into());
-    }
-
-    /// Sets the corner radius for this view.
-    ///
-    /// Default: `0`
-    pub fn set_corner_radius(&mut self, radius: f32) {
-        self.inner.set_corner_radius(radius);
-    }
-
+impl Text {
     /// Sets the position type for this View which determines how it is positioned
     /// within its parent.
     ///
@@ -122,38 +67,11 @@ impl View {
         self.inner.set_needs_layout();
     }
 
-    /// Sets the content alignment for this view.
-    ///
-    /// Content alignment defines the distribution of lines along the cross-axis.
-    /// This only has effect when items are wrapped to multiple lines.
-    pub fn set_align_content(&mut self, align: Align) {
-        self.inner.yoga().set_align_content(align);
-        self.inner.set_needs_layout();
-    }
-
-    /// Sets the item alignment for this view.
-    pub fn set_align_items(&mut self, align: Align) {
-        self.inner.yoga().set_align_items(align);
-        self.inner.set_needs_layout();
-    }
-
     /// Sets the self alignment for this view.
     ///
     /// Overrides the item alignment on the parent of this view.
     pub fn set_align_self(&mut self, align: Align) {
         self.inner.yoga().set_align_self(align);
-        self.inner.set_needs_layout();
-    }
-
-    /// Sets the flex direction for this view.
-    pub fn set_flex_direction(&mut self, flex_direction: FlexDirection) {
-        self.inner.yoga().set_flex_direction(flex_direction);
-        self.inner.set_needs_layout();
-    }
-
-    /// Sets the flex wrap for this view.
-    pub fn set_flex_wrap(&mut self, wrap: Wrap) {
-        self.inner.yoga().set_flex_wrap(wrap);
         self.inner.set_needs_layout();
     }
 
@@ -188,12 +106,6 @@ impl View {
             .yoga()
             .set_flex_basis(yoga::StyleUnit::Point(flex_basis.into()));
 
-        self.inner.set_needs_layout();
-    }
-
-    /// Sets the content justification for this view.
-    pub fn set_justify_content(&mut self, justify: Justify) {
-        self.inner.yoga().set_justify_content(justify);
         self.inner.set_needs_layout();
     }
 

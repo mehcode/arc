@@ -4,7 +4,7 @@ use super::{
 };
 use cocoa::{
     appkit::NSEvent,
-    base::{class, id, YES},
+    base::{class, id, YES, NO},
     foundation::{NSPoint, NSRect, NSSize, NSUInteger},
 };
 use objc::{
@@ -13,6 +13,7 @@ use objc::{
 };
 use std::{os::raw::c_void, ptr};
 use yoga;
+use super::node::yoga_from_handle;
 
 // TODO: Investigate ways to make this file more "safe"
 
@@ -23,11 +24,6 @@ pub(crate) struct View(pub(crate) id);
 //       public access is only allowed on main thread.
 unsafe impl Send for View {}
 
-// Accessor for a View's yoga node
-fn get_yoga_node(handle: id) -> &'static mut yoga::Node {
-    unsafe { &mut *(*(*handle).get_mut_ivar::<*mut c_void>("sqYGNode") as *mut _) }
-}
-
 impl View {
     pub(crate) fn new() -> Self {
         // Allocate and initialize an empty, native view
@@ -37,11 +33,11 @@ impl View {
     }
 
     pub(crate) fn add(&mut self, node: &impl Node) {
-        let this_node = self.yoga_node();
+        let this_node = self.yoga();
         let this_node_children_count = this_node.child_count();
 
         let incoming_handle = node.handle();
-        let incoming_node = get_yoga_node(incoming_handle);
+        let incoming_node = yoga_from_handle(incoming_handle);
 
         // Add this node as a sub-node (in layout)
         this_node.insert_child(incoming_node, this_node_children_count);
@@ -49,22 +45,6 @@ impl View {
         // Add the view as a sub-view (in ui)
         unsafe {
             msg_send![self.0, addSubview: incoming_handle];
-        }
-    }
-
-    pub(crate) fn yoga_node(&mut self) -> &mut yoga::Node {
-        get_yoga_node(self.0)
-    }
-
-    /// Inform the view that a layout pass is needed before the next draw.
-    pub(crate) fn set_needs_layout(&mut self) {
-        unsafe {
-            // NOTE: Currently there is no way to re-layout just 1 area in a window.
-
-            let window: id = msg_send![self.0, window];
-            let window_content_view: id = msg_send![window, contentView];
-
-            msg_send![window_content_view, setNeedsLayout: YES];
         }
     }
 
@@ -244,6 +224,8 @@ extern "C" fn init(this: &Object, _: Sel) -> id {
         let super_cls = Class::get("NSView").unwrap();
         let this: id = msg_send![super(this, super_cls), init];
 
+        println!("[init] {:?}", *this);
+
         // Yoga node (layout)
 
         (*this).set_ivar(
@@ -323,7 +305,7 @@ extern "C" fn dealloc(this: &Object, _: Sel) {
 }
 
 fn yoga_apply_layout_to_view_hierarchy(view: id) {
-    let node = get_yoga_node(view);
+    let node = yoga_from_handle(view);
 
     let x = f64::from(node.get_layout_left());
     let y = f64::from(node.get_layout_top());
@@ -355,7 +337,7 @@ extern "C" fn layout(this: &mut Object, _: Sel) {
 
         if is_root {
             let bounds: NSRect = msg_send![this, frame];
-            let node = get_yoga_node(&mut *this);
+            let node = yoga_from_handle(&mut *this);
 
             // Calculate layout for tree (if at root)
             node.calculate_layout(
@@ -377,7 +359,7 @@ extern "C" fn is_flipped(_: &Object, _: Sel) -> BOOL {
 }
 
 extern "C" fn wants_update_layer(_: &Object, _: Sel) -> BOOL {
-    YES
+    NO
 }
 
 extern "C" fn update_layer(this: &Object, _: Sel) {

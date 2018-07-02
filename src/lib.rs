@@ -16,6 +16,12 @@ extern crate objc;
 extern crate cocoa;
 
 #[cfg(target_os = "macos")]
+extern crate core_text;
+
+#[cfg(target_os = "macos")]
+extern crate core_graphics;
+
+#[cfg(target_os = "macos")]
 extern crate dispatch;
 
 mod color;
@@ -26,10 +32,12 @@ mod geometry;
 mod node;
 mod os;
 mod view;
+mod text;
 mod window;
 
 pub use yoga::{Align, Edge, FlexDirection, Justify, PositionType, Wrap};
 
 pub use self::{
     color::*, context::*, event::*, events::*, geometry::*, node::*, view::*, window::*,
+    text::*,
 };
