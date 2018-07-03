@@ -1,19 +1,20 @@
 use super::{
     super::super::{Color, Event, MouseButton, MouseDown, MouseEnter, MouseLeave, MouseUp, Point},
+    node::yoga_from_handle,
     Node,
 };
 use cocoa::{
     appkit::NSEvent,
-    base::{class, id, YES, NO},
+    base::{class, id, YES},
     foundation::{NSPoint, NSRect, NSSize, NSUInteger},
 };
+use core_graphics::geometry::CGRect;
 use objc::{
     declare::ClassDecl,
     runtime::{Class, Object, Sel, BOOL},
 };
 use std::{os::raw::c_void, ptr};
 use yoga;
-use super::node::yoga_from_handle;
 
 // TODO: Investigate ways to make this file more "safe"
 
@@ -64,8 +65,6 @@ impl View {
 
             (*self.0).set_ivar::<id>("sqBackgroundColor", color);
 
-            // NOTE: This is only needed at the _root_ of the hierarchy
-            msg_send![self.0, setWantsLayer: YES];
             msg_send![self.0, setNeedsDisplay: YES];
         }
     }
@@ -94,16 +93,6 @@ impl View {
 
     pub(crate) fn mouse_leave(&mut self) -> &mut Event<MouseLeave> {
         unsafe { &mut *(*(*self.0).get_mut_ivar::<*mut c_void>("sqEVTMouseLeave") as *mut _) }
-    }
-}
-
-impl Clone for View {
-    fn clone(&self) -> Self {
-        unsafe {
-            msg_send![self.0, retain];
-        }
-
-        View(self.0)
     }
 }
 
@@ -162,13 +151,8 @@ fn declare() -> &'static Class {
         );
 
         cls_decl.add_method(
-            sel!(wantsUpdateLayer),
-            wants_update_layer as extern "C" fn(_: &Object, _: Sel) -> BOOL,
-        );
-
-        cls_decl.add_method(
-            sel!(updateLayer),
-            update_layer as extern "C" fn(_: &Object, _: Sel),
+            sel!(drawRect:),
+            draw_rect as extern "C" fn(_: &Object, _: Sel, _: NSRect),
         );
 
         // Events (method)
@@ -223,8 +207,6 @@ extern "C" fn init(this: &Object, _: Sel) -> id {
 
         let super_cls = Class::get("NSView").unwrap();
         let this: id = msg_send![super(this, super_cls), init];
-
-        println!("[init] {:?}", *this);
 
         // Yoga node (layout)
 
@@ -358,24 +340,50 @@ extern "C" fn is_flipped(_: &Object, _: Sel) -> BOOL {
     YES
 }
 
-extern "C" fn wants_update_layer(_: &Object, _: Sel) -> BOOL {
-    NO
+//extern "C" fn wants_update_layer(_: &Object, _: Sel) -> BOOL {
+//    YES
+//}
+//
+//extern "C" fn update_layer(this: &Object, _: Sel) {
+//    unsafe {
+//        let layer: id = msg_send![this, layer];
+//
+//        let background_color: &id = (*this).get_ivar::<id>("sqBackgroundColor");
+//        if !background_color.is_null() {
+//            let background_color: id = msg_send![*background_color, CGColor];
+//
+//            println!("SET THE BG COLOR");
+//            msg_send![layer, setBackgroundColor: background_color];
+//        }
+//
+//        let corner_radius: f64 = *(*this).get_ivar("sqCornerRadius");
+//        msg_send![layer, setCornerRadius: corner_radius];
+//        msg_send![layer, setMasksToBounds: YES];
+//    }
+//}
+
+extern "C" {
+    fn CGContextSetFillColorWithColor(context: id, color: id);
+    fn CGContextFillRect(context: id, rect: CGRect);
 }
 
-extern "C" fn update_layer(this: &Object, _: Sel) {
+extern "C" fn draw_rect(this: &Object, _: Sel, dirty_rect: NSRect) {
     unsafe {
-        let layer: id = msg_send![this, layer];
-
-        let background_color: &id = (*this).get_ivar::<id>("sqBackgroundColor");
+        // Draw background (if present)
+        let background_color: &id = (*this).get_ivar("sqBackgroundColor");
         if !background_color.is_null() {
-            let background_color: id = msg_send![*background_color, CGColor];
+            // TODO: Make helper function here
+            let context: id = msg_send![class("NSGraphicsContext"), currentContext];
+            let context: id = msg_send![context, CGContext];
 
-            msg_send![layer, setBackgroundColor: background_color];
+            let background_color: id = msg_send![*background_color, CGColor];
+            CGContextSetFillColorWithColor(context, background_color);
+
+            CGContextFillRect(context, *dirty_rect.as_CGRect());
         }
 
-        let corner_radius: f64 = *(*this).get_ivar("sqCornerRadius");
-        msg_send![layer, setCornerRadius: corner_radius];
-        msg_send![layer, setMasksToBounds: YES];
+        // Draw subviews (on top of background)
+        msg_send![super(this, &*class("NSView")), drawRect: dirty_rect];
     }
 }
 

@@ -1,14 +1,13 @@
 use super::{
-    context::WeakContext, events, os, Align, Color, Context, Edge, Event, FlexDirection, Justify,
-    Node, NodeId, PositionType, Wrap,
+    os::{self, Node as OsNode},
+    Align, Color, Context, Edge, Node, NodeId, PositionType,
 };
-use super::os::Node as OsNode;
 use yoga;
 
 pub struct Text {
     pub(crate) id: NodeId,
     pub(crate) inner: os::Text,
-    pub(crate) context: WeakContext,
+    // pub(crate) context: WeakContext,
 }
 
 impl Text {
@@ -16,8 +15,28 @@ impl Text {
         Self {
             id: context.next_id(),
             inner: os::Text::new(),
-            context: context.downgrade(),
+            // context: context.downgrade(),
         }
+    }
+
+    //
+    // Text
+    //
+
+    pub fn set_text(&mut self, text: &str) {
+        self.inner.set_text(text);
+    }
+
+    pub fn set_text_color(&mut self, color: impl Into<Color>) {
+        self.inner.set_text_color(color.into());
+    }
+
+    //
+    // Font
+    //
+
+    pub fn set_font_size(&mut self, size: f32) {
+        self.inner.set_font_size(size);
     }
 }
 
@@ -44,7 +63,27 @@ impl From<Text> for NodeId {
 }
 
 //
-// Layout (Item)
+// Style
+//
+
+impl Text {
+    /// Sets the background color for this node.
+    ///
+    /// Default: `transparent` (`0x00_00_00_00`)
+    pub fn set_background_color(&mut self, color: impl Into<Color>) {
+        self.inner.set_background_color(color.into());
+    }
+
+    // Sets the corner radius for this node.
+    //
+    // Default: `0`
+    // pub fn set_corner_radius(&mut self, radius: f32) {
+    //    self.inner.set_corner_radius(radius);
+    // }
+}
+
+//
+// Layout – Self
 //
 
 impl Text {

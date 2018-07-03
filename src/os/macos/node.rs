@@ -1,6 +1,5 @@
-use cocoa::base::id;
+use cocoa::base::{id, YES};
 use std::os::raw::c_void;
-use cocoa::base::YES;
 use yoga;
 
 pub(crate) type NodeHandle = id;

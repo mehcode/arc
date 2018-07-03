@@ -1,7 +1,7 @@
 mod context;
 mod node;
-mod view;
 mod text;
+mod view;
 mod window;
 
-pub(crate) use self::{context::*, node::*, view::*, window::*, text::*};
+pub(crate) use self::{context::*, node::*, text::*, view::*, window::*};

@@ -1,8 +1,9 @@
 use super::{
-    context::WeakContext, events, os, Align, Color, Context, Edge, Event, FlexDirection, Justify,
-    Node, NodeId, PositionType, Wrap,
+    context::WeakContext,
+    events,
+    os::{self, Node as OsNode},
+    Align, Color, Context, Edge, Event, FlexDirection, Justify, Node, NodeId, PositionType, Wrap,
 };
-use super::os::Node as OsNode;
 use yoga;
 
 /// The fundamental component, `View` is a container that supports
@@ -89,20 +90,26 @@ impl View {
 //
 
 impl View {
-    /// Sets the background color for this view.
+    /// Sets the background color for this node.
     ///
     /// Default: `transparent` (`0x00_00_00_00`)
     pub fn set_background_color(&mut self, color: impl Into<Color>) {
         self.inner.set_background_color(color.into());
     }
 
-    /// Sets the corner radius for this view.
+    /// Sets the corner radius for this node.
     ///
     /// Default: `0`
     pub fn set_corner_radius(&mut self, radius: f32) {
         self.inner.set_corner_radius(radius);
     }
+}
 
+//
+// Layout – Self
+//
+
+impl View {
     /// Sets the position type for this View which determines how it is positioned
     /// within its parent.
     ///
@@ -122,38 +129,11 @@ impl View {
         self.inner.set_needs_layout();
     }
 
-    /// Sets the content alignment for this view.
-    ///
-    /// Content alignment defines the distribution of lines along the cross-axis.
-    /// This only has effect when items are wrapped to multiple lines.
-    pub fn set_align_content(&mut self, align: Align) {
-        self.inner.yoga().set_align_content(align);
-        self.inner.set_needs_layout();
-    }
-
-    /// Sets the item alignment for this view.
-    pub fn set_align_items(&mut self, align: Align) {
-        self.inner.yoga().set_align_items(align);
-        self.inner.set_needs_layout();
-    }
-
     /// Sets the self alignment for this view.
     ///
     /// Overrides the item alignment on the parent of this view.
     pub fn set_align_self(&mut self, align: Align) {
         self.inner.yoga().set_align_self(align);
-        self.inner.set_needs_layout();
-    }
-
-    /// Sets the flex direction for this view.
-    pub fn set_flex_direction(&mut self, flex_direction: FlexDirection) {
-        self.inner.yoga().set_flex_direction(flex_direction);
-        self.inner.set_needs_layout();
-    }
-
-    /// Sets the flex wrap for this view.
-    pub fn set_flex_wrap(&mut self, wrap: Wrap) {
-        self.inner.yoga().set_flex_wrap(wrap);
         self.inner.set_needs_layout();
     }
 
@@ -188,12 +168,6 @@ impl View {
             .yoga()
             .set_flex_basis(yoga::StyleUnit::Point(flex_basis.into()));
 
-        self.inner.set_needs_layout();
-    }
-
-    /// Sets the content justification for this view.
-    pub fn set_justify_content(&mut self, justify: Justify) {
-        self.inner.yoga().set_justify_content(justify);
         self.inner.set_needs_layout();
     }
 
@@ -283,6 +257,45 @@ impl View {
             .yoga()
             .set_height(yoga::StyleUnit::Percent(height.into()));
 
+        self.inner.set_needs_layout();
+    }
+}
+
+//
+// Layout – Children
+//
+
+impl View {
+    /// Sets the content alignment for this view.
+    ///
+    /// Content alignment defines the distribution of lines along the cross-axis.
+    /// This only has effect when items are wrapped to multiple lines.
+    pub fn set_align_content(&mut self, align: Align) {
+        self.inner.yoga().set_align_content(align);
+        self.inner.set_needs_layout();
+    }
+
+    /// Sets the item alignment for this view.
+    pub fn set_align_items(&mut self, align: Align) {
+        self.inner.yoga().set_align_items(align);
+        self.inner.set_needs_layout();
+    }
+
+    /// Sets the flex direction for this view.
+    pub fn set_flex_direction(&mut self, flex_direction: FlexDirection) {
+        self.inner.yoga().set_flex_direction(flex_direction);
+        self.inner.set_needs_layout();
+    }
+
+    /// Sets the flex wrap for this view.
+    pub fn set_flex_wrap(&mut self, wrap: Wrap) {
+        self.inner.yoga().set_flex_wrap(wrap);
+        self.inner.set_needs_layout();
+    }
+
+    /// Sets the content justification for this view.
+    pub fn set_justify_content(&mut self, justify: Justify) {
+        self.inner.yoga().set_justify_content(justify);
         self.inner.set_needs_layout();
     }
 }
