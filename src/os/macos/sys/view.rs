@@ -4,16 +4,18 @@ use cocoa::{
     foundation::{NSPoint, NSRect, NSSize, NSUInteger},
 };
 use color::Color;
-use core_graphics::geometry::CGRect;
+use core_foundation::base::FromVoid;
+use core_graphics::{base::CGFloat, color::CGColor, context::CGContext, path::CGPath};
 use event::Event;
 use events::{MouseButton, MouseDown, MouseEnter, MouseLeave, MouseUp};
+use foreign_types_shared::ForeignType;
 use geometry::Point;
 use objc::{
     declare::ClassDecl,
     runtime::{Class, Object, Sel, BOOL, YES},
 };
 use os::macos::node::yoga_from_handle;
-use std::{os::raw::c_void, ptr};
+use std::{mem, os::raw::c_void, ptr};
 use yoga;
 
 lazy_static! {
@@ -251,48 +253,47 @@ extern "C" fn is_flipped(_: &Object, _: Sel) -> BOOL {
     YES
 }
 
-//extern "C" fn wants_update_layer(_: &Object, _: Sel) -> BOOL {
-//    YES
-//}
-//
-//extern "C" fn update_layer(this: &Object, _: Sel) {
-//    unsafe {
-//        let layer: id = msg_send![this, layer];
-//
-//        let background_color: &id = (*this).get_ivar::<id>("sqBackgroundColor");
-//        if !background_color.is_null() {
-//            let background_color: id = msg_send![*background_color, CGColor];
-//
-//            println!("SET THE BG COLOR");
-//            msg_send![layer, setBackgroundColor: background_color];
-//        }
-//
-//        let corner_radius: f64 = *(*this).get_ivar("sqCornerRadius");
-//        msg_send![layer, setCornerRadius: corner_radius];
-//        msg_send![layer, setMasksToBounds: YES];
-//    }
-//}
-
-extern "C" {
-    fn CGContextSetFillColorWithColor(context: id, color: id);
-    fn CGContextFillRect(context: id, rect: CGRect);
-}
-
 extern "C" fn draw_rect(this: &Object, _: Sel, dirty_rect: NSRect) {
-    unsafe {
-        // Draw background (if present)
-        let background_color: &id = (*this).get_ivar("sqBackgroundColor");
-        if !background_color.is_null() {
-            // TODO: Make helper function here
+    let background_color: &id = unsafe { (*this).get_ivar("sqBackgroundColor") };
+
+    if !background_color.is_null() {
+        let context = unsafe {
             let context: id = msg_send![class("NSGraphicsContext"), currentContext];
             let context: id = msg_send![context, CGContext];
 
-            let background_color: id = msg_send![*background_color, CGColor];
-            CGContextSetFillColorWithColor(context, background_color);
+            CGContext::from_ptr(context as *mut _)
+        };
 
-            CGContextFillRect(context, *dirty_rect.as_CGRect());
-        }
+        let path = unsafe {
+            let radius: CGFloat = *(*this).get_ivar("sqCornerRadius");
+            let bounds: NSRect = msg_send![this, bounds];
 
+            let path: id = msg_send![class("NSBezierPath"), bezierPathWithRoundedRect: bounds xRadius: radius yRadius: radius];
+            let path: *mut <CGPath as ForeignType>::CType = msg_send![path, CGPath];
+
+            CGPath::from_ptr(path)
+        };
+
+        let background_color = unsafe {
+            let background_color: *const c_void = msg_send![*background_color, CGColor];
+
+            CGColor::from_void(background_color)
+        };
+
+        context.save();
+
+        context.add_path(&path);
+        context.set_fill_color(&*background_color);
+        context.close_path();
+        context.fill_path();
+
+        context.restore();
+
+        mem::forget(path);
+        mem::forget(context);
+    }
+
+    unsafe {
         // Draw subviews (on top of background)
         msg_send![super(this, &*class("NSView")), drawRect: dirty_rect];
     }
