@@ -2,6 +2,7 @@
 extern crate lazy_static;
 
 extern crate fnv;
+extern crate foreign_types_shared;
 extern crate parking_lot;
 extern crate yoga;
 
@@ -29,6 +30,11 @@ extern crate core_graphics;
 
 #[cfg(target_os = "macos")]
 extern crate dispatch;
+
+// TODO: Replace `unsafe impl Send ...` with `UnsafeSend` wrappers where needed
+// TODO: Fix padding for Text
+// TODO: Implement text alignment
+// TODO: Implement intrinsic size (layout measurement) for text
 
 mod color;
 mod context;

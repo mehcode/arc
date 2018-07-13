@@ -35,6 +35,10 @@ impl Text {
     // Font
     //
 
+    pub fn set_font_family(&mut self, family: &str) {
+        self.inner.set_font_family(family);
+    }
+
     pub fn set_font_size(&mut self, size: f32) {
         self.inner.set_font_size(size);
     }
