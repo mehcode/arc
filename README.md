@@ -1,4 +1,4 @@
-# Square
+# Arc
 > Native UI toolkit for creating cross-platform graphical user interfaces in Rust.
 
 ![](./example-layout.png)

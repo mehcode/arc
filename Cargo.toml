@@ -1,16 +1,16 @@
 [package]
-name = "square"
+name = "arc"
 version = "0.1.0"
 authors = ["Ryan Leckey <leckey.ryan@gmail.com>"]
 description = ""
 
 [package.metadata.bundle.example.layout]
 name = "Layout"
-identifier = "io.mehcode.square.example.layout"
+identifier = "io.mehcode.arc.example.layout"
 
 [package.metadata.bundle.example.calculator]
 name = "Calculator"
-identifier = "io.mehcode.square.example.calculator"
+identifier = "io.mehcode.arc.example.calculator"
 
 [dependencies]
 lazy_static = "1"
@@ -22,11 +22,6 @@ downcast = "0.9.2"
 [target.'cfg(target_os = "macos")'.dependencies]
 objc = "0.2"
 dispatch = "0.1"
-#cocoa = "0.15"
-#core-foundation = "0.6"
-#core-foundation-sys = "0.6"
-#core-graphics = "0.14"
-#core-text = "10.0"
 core-foundation = { git = "https://github.com/mehcode/core-foundation-rs" }
 core-foundation-sys = { git = "https://github.com/mehcode/core-foundation-rs" }
 core-graphics = { git = "https://github.com/mehcode/core-foundation-rs" }

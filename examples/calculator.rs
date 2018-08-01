@@ -1,6 +1,6 @@
-extern crate square;
+extern crate arc;
 
-use square::*;
+use arc::*;
 
 const PADDING: f32 = 5.;
 

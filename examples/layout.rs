@@ -1,6 +1,6 @@
-extern crate square;
+extern crate arc;
 
-use square::*;
+use arc::*;
 
 fn main() {
     let c = Context::new();
