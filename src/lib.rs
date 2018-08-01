@@ -31,6 +31,9 @@ extern crate core_graphics;
 #[cfg(target_os = "macos")]
 extern crate dispatch;
 
+#[macro_use]
+mod layout;
+
 mod color;
 mod context;
 mod event;
@@ -42,6 +45,7 @@ mod text;
 mod view;
 mod window;
 
+// TODO: Submit documentation for these types to `yoga`.
 pub use yoga::{Align, Edge, FlexDirection, Justify, PositionType, Wrap};
 
 pub use self::{

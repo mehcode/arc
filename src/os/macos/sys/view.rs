@@ -379,3 +379,9 @@ pub(crate) fn set_background_color(this: id, color: Color) {
         msg_send![this, setNeedsDisplay: YES];
     }
 }
+
+pub(crate) fn set_corner_radius(this: id, radius: f32) {
+    unsafe {
+        (*this).set_ivar("sqCornerRadius", f64::from(radius));
+    }
+}

@@ -1,15 +1,11 @@
 use super::{
     super::super::{Color, Event, MouseDown, MouseEnter, MouseLeave, MouseUp},
     node::yoga_from_handle,
-    sys::view,
-    Node,
+    sys, Node,
 };
-use cocoa::base::id;
-use std::os::raw::c_void;
+use objc::runtime::Object;
 
-// TODO: Investigate ways to make this file more "safe"
-
-pub(crate) struct View(pub(crate) id);
+pub(crate) struct View(pub(crate) *mut Object);
 
 // NOTE: In order to send references of this packed in Context to different threads.
 //       It's very unsafe to touch these unless on the "main" thread but Context ensures
@@ -18,11 +14,12 @@ unsafe impl Send for View {}
 
 impl View {
     pub(crate) fn new() -> Self {
-        // Allocate and initialize an empty, native view
-        let view: id = unsafe { msg_send![*view::CLASS, new] };
-
-        View(view)
+        View(unsafe { msg_send![*sys::view::CLASS, new] })
     }
+
+    //
+    // Container
+    //
 
     pub(crate) fn add(&mut self, node: &impl Node) {
         let this_node = self.yoga();
@@ -44,34 +41,38 @@ impl View {
     // Style
     //
 
+    #[inline]
     pub(crate) fn set_background_color(&mut self, color: Color) {
-        view::set_background_color(self.0, color);
+        sys::view::set_background_color(self.0, color);
     }
 
+    #[inline]
     pub(crate) fn set_corner_radius(&mut self, radius: f32) {
-        unsafe {
-            (*self.0).set_ivar("sqCornerRadius", f64::from(radius));
-        }
+        sys::view::set_corner_radius(self.0, radius);
     }
 
     //
     // Events
     //
 
+    #[inline]
     pub(crate) fn mouse_down(&mut self) -> &mut Event<MouseDown> {
-        unsafe { &mut *(*(*self.0).get_mut_ivar::<*mut c_void>("sqEVTMouseDown") as *mut _) }
+        sys::event(self.0, "sqEVTMouseDown")
     }
 
+    #[inline]
     pub(crate) fn mouse_up(&mut self) -> &mut Event<MouseUp> {
-        unsafe { &mut *(*(*self.0).get_mut_ivar::<*mut c_void>("sqEVTMouseUp") as *mut _) }
+        sys::event(self.0, "sqEVTMouseUp")
     }
 
+    #[inline]
     pub(crate) fn mouse_enter(&mut self) -> &mut Event<MouseEnter> {
-        unsafe { &mut *(*(*self.0).get_mut_ivar::<*mut c_void>("sqEVTMouseEnter") as *mut _) }
+        sys::event(self.0, "sqEVTMouseEnter")
     }
 
+    #[inline]
     pub(crate) fn mouse_leave(&mut self) -> &mut Event<MouseLeave> {
-        unsafe { &mut *(*(*self.0).get_mut_ivar::<*mut c_void>("sqEVTMouseLeave") as *mut _) }
+        sys::event(self.0, "sqEVTMouseLeave")
     }
 }
 
@@ -84,7 +85,7 @@ impl Drop for View {
 }
 
 impl Node for View {
-    fn handle(&self) -> id {
+    fn handle(&self) -> *mut Object {
         self.0
     }
 }

@@ -12,7 +12,7 @@ fn main() {
     cell.set_flex_grow(1.);
     cell.set_font_family("Input Mono");
     cell.set_text("Firefox Nightly");
-    cell.set_font_size(16.);
+    cell.set_text_size(16.);
     cell.set_background_color(0xff_d2d2d2);
     // cell.set_font_weight(600);
 
