@@ -1,4 +1,5 @@
 use super::{current_context, view};
+use super::super::node::yoga_from_handle;
 use cocoa::{base::id, foundation::NSRect};
 use color::Color;
 use core_foundation::{
@@ -105,6 +106,8 @@ extern "C" fn draw_rect(this: &mut Object, _: Sel, dirty_rect: NSRect) {
     let mut text =
         unsafe { CFMutableAttributedString::from_mut_void(*(*this).get_mut_ivar("sqText")) };
 
+    let yg_node = yoga_from_handle(this);
+
     // TODO: Only create (and set) CTFont if needed
 
     let font_family = unsafe { CFString::from_void(*this.get_ivar("sqFontFamily")) };
@@ -118,7 +121,20 @@ extern "C" fn draw_rect(this: &mut Object, _: Sel, dirty_rect: NSRect) {
 
     let framesetter = CTFramesetter::new_with_attributed_string(text.as_concrete_TypeRef());
 
-    let bounds: CGRect = unsafe { msg_send![this, bounds] };
+    let mut bounds: CGRect = unsafe { msg_send![this, bounds] };
+
+    // Apply padding (from Yoga) to path bounds
+
+    let padding_left = yg_node.get_layout_padding_left();
+    let padding_right = yg_node.get_layout_padding_right();
+    let padding_top = yg_node.get_layout_padding_top();
+    let padding_bottom = yg_node.get_layout_padding_bottom();
+
+    bounds.origin.x += f64::from(padding_left);
+    bounds.origin.y -= f64::from(padding_top);
+    bounds.size.width -= f64::from(padding_left + padding_right);
+    bounds.size.height -= f64::from(padding_top + padding_bottom);
+
     let path = CGPath::new_with_rect(bounds);
 
     let frame = framesetter.create_frame(CFRange::init(0, 0), &path);

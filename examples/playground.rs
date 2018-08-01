@@ -5,18 +5,16 @@ use arc::*;
 fn main() {
     let c = Context::new();
 
-    let mut window = Window::new(&c, 600., 600.);
+    let mut window = Window::new(&c, 375., 640.);
     window.set_title("Playground");
 
     let mut cell = Text::new(&c);
     cell.set_flex_grow(1.);
     cell.set_font_family("Futura");
-    cell.set_text("Firefox Nightly");
+    cell.set_text("Bacon ipsum dolor amet ground round prosciutto picanha turkey, shank pancetta tail burgdoggen kielbasa chuck kevin boudin. Doner pork loin strip steak fatback burgdoggen, cupim turducken beef ribs chicken bresaola andouille shoulder alcatra hamburger filet mignon.\n\nChicken meatloaf beef salami meatball, doner brisket chuck prosciutto landjaeger filet mignon tri-tip capicola. Burgdoggen ham picanha, andouille strip steak meatball spare ribs pork doner pork belly pork loin. ");
     cell.set_text_size(20.);
-    cell.set_background_color(0xff_d2d2d2);
-    cell.set_text_color(0xff_525252);
-    cell.set_position(Edge::Top, -10.);
-    // cell.set_font_weight(600);
+    cell.set_text_color(0xff_424242);
+    cell.set_padding(Edge::All, 20.);
 
     let mut inner = View::new(&c);
     inner.set_flex_grow(1.);
