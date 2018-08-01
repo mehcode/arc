@@ -1,3 +1,4 @@
+use super::current_context;
 use cocoa::{
     appkit::NSEvent,
     base::{class, id},
@@ -5,17 +6,17 @@ use cocoa::{
 };
 use color::Color;
 use core_foundation::base::FromVoid;
-use core_graphics::{base::CGFloat, color::CGColor, context::CGContext, path::CGPath};
+use core_graphics::{base::CGFloat, color::CGColor, path::CGPathRef};
 use event::Event;
 use events::{MouseButton, MouseDown, MouseEnter, MouseLeave, MouseUp};
-use foreign_types_shared::ForeignType;
+use foreign_types_shared::ForeignTypeRef;
 use geometry::Point;
 use objc::{
     declare::ClassDecl,
     runtime::{Class, Object, Sel, BOOL, YES},
 };
 use os::macos::node::yoga_from_handle;
-use std::{mem, os::raw::c_void, ptr};
+use std::{os::raw::c_void, ptr};
 use yoga;
 
 lazy_static! {
@@ -257,21 +258,17 @@ extern "C" fn draw_rect(this: &Object, _: Sel, dirty_rect: NSRect) {
     let background_color: &id = unsafe { (*this).get_ivar("sqBackgroundColor") };
 
     if !background_color.is_null() {
-        let context = unsafe {
-            let context: id = msg_send![class("NSGraphicsContext"), currentContext];
-            let context: id = msg_send![context, CGContext];
-
-            CGContext::from_ptr(context as *mut _)
-        };
+        let context = current_context();
 
         let path = unsafe {
             let radius: CGFloat = *(*this).get_ivar("sqCornerRadius");
             let bounds: NSRect = msg_send![this, bounds];
 
+            // NSPath instance ownership transferred to CGContext later in function
             let path: id = msg_send![class("NSBezierPath"), bezierPathWithRoundedRect: bounds xRadius: radius yRadius: radius];
-            let path: *mut <CGPath as ForeignType>::CType = msg_send![path, CGPath];
+            let path: *mut c_void = msg_send![path, CGPath];
 
-            CGPath::from_ptr(path)
+            CGPathRef::from_ptr(path as *mut _)
         };
 
         let background_color = unsafe {
@@ -282,15 +279,12 @@ extern "C" fn draw_rect(this: &Object, _: Sel, dirty_rect: NSRect) {
 
         context.save();
 
-        context.add_path(&path);
+        context.add_path(path);
         context.set_fill_color(&*background_color);
         context.close_path();
         context.fill_path();
 
         context.restore();
-
-        mem::forget(path);
-        mem::forget(context);
     }
 
     unsafe {

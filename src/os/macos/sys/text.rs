@@ -1,8 +1,5 @@
-use super::view;
-use cocoa::{
-    base::{class, id},
-    foundation::NSRect,
-};
+use super::{current_context, view};
+use cocoa::{base::id, foundation::NSRect};
 use color::Color;
 use core_foundation::{
     attributed_string::CFMutableAttributedString,
@@ -11,13 +8,10 @@ use core_foundation::{
 };
 use core_graphics::{
     base::CGFloat,
-    color::CGColor,
-    context::CGContext,
     geometry::{CGRect, CG_AFFINE_TRANSFORM_IDENTITY},
     path::CGPath,
 };
 use core_text::{font::CTFont, framesetter::CTFramesetter};
-use foreign_types_shared::ForeignType;
 use objc::{
     declare::ClassDecl,
     runtime::{Class, Object, Sel},
@@ -34,7 +28,7 @@ lazy_static! {
             decl.add_ivar::<CGFloat>("sqFontSize");
             decl.add_ivar::<u16>("sqFontWeight");
             // decl.add_ivar::<*const c_void>("sqFont");
-            decl.add_ivar::<*const c_void>("sqFramesetter");
+            // decl.add_ivar::<*const c_void>("sqFramesetter");
 
             decl.add_method(sel!(init), init as extern "C" fn(_: &Object, _: Sel) -> id);
             decl.add_method(
@@ -60,10 +54,10 @@ extern "C" fn init(this: &Object, _: Sel) -> id {
 
         (*this).set_ivar("sqText", text.to_void());
 
+        // Memory to be released in dealloc
         mem::forget(text);
     }
 
-    set_text(this, "");
     set_font_size(this, 14.);
     set_font_family(this, ".SF NS Text");
 
@@ -112,6 +106,7 @@ extern "C" fn draw_rect(this: &mut Object, _: Sel, dirty_rect: NSRect) {
         unsafe { CFMutableAttributedString::from_mut_void(*(*this).get_mut_ivar("sqText")) };
 
     // TODO: Only create (and set) CTFont if needed
+
     let font_family = unsafe { CFString::from_void(*this.get_ivar("sqFontFamily")) };
     let font_size: CGFloat = unsafe { *this.get_ivar("sqFontSize") };
     let font = CTFont::new_from_name(&font_family, font_size).unwrap();
@@ -120,6 +115,7 @@ extern "C" fn draw_rect(this: &mut Object, _: Sel, dirty_rect: NSRect) {
     unsafe { text.set_attribute(range, kCTFontAttributeName, font) };
 
     // TODO: Only create CTFramesetter if needed
+
     let framesetter = CTFramesetter::new_with_attributed_string(text.as_concrete_TypeRef());
 
     let bounds: CGRect = unsafe { msg_send![this, bounds] };
@@ -127,12 +123,7 @@ extern "C" fn draw_rect(this: &mut Object, _: Sel, dirty_rect: NSRect) {
 
     let frame = framesetter.create_frame(CFRange::init(0, 0), &path);
 
-    let context = unsafe {
-        let context: id = msg_send![class("NSGraphicsContext"), currentContext];
-        let context: id = msg_send![context, CGContext];
-
-        CGContext::from_ptr(context as *mut _)
-    };
+    let context = current_context();
 
     context.save();
 
@@ -140,11 +131,9 @@ extern "C" fn draw_rect(this: &mut Object, _: Sel, dirty_rect: NSRect) {
     context.translate(0., bounds.size.height);
     context.scale(1.0, -1.0);
 
-    frame.draw(&context);
+    frame.draw(context);
 
     context.restore();
-
-    mem::forget(context);
 }
 
 pub(crate) fn set_text(this: id, string: &str) {
@@ -161,13 +150,7 @@ pub(crate) fn set_text_color(this: id, color: Color) {
     let mut text =
         unsafe { CFMutableAttributedString::from_mut_void(*(*this).get_mut_ivar("sqText")) };
 
-    let color = CGColor::rgb(
-        CGFloat::from(color.red),
-        CGFloat::from(color.green),
-        CGFloat::from(color.blue),
-        CGFloat::from(color.alpha),
-    );
-
+    let color = color.into_cgcolor();
     let range = CFRange::init(0, text.char_len());
 
     unsafe {
@@ -178,7 +161,8 @@ pub(crate) fn set_text_color(this: id, color: Color) {
 }
 
 pub(crate) fn set_font_family(this: id, family: &str) {
-    // cf_release!(&mut *this, "sqFont");
+    // Release existing fontFamily (if set)
+    cf_release!(&mut *this, "sqFontFamily");
 
     let family: CFString = family.into();
 
@@ -189,9 +173,10 @@ pub(crate) fn set_font_family(this: id, family: &str) {
         );
     }
 
-    // TODO: set_needs_display()
-
+    // Memory to be released in dealloc
     mem::forget(family);
+
+    // TODO: set_needs_display()
 }
 
 pub(crate) fn set_font_size(this: id, size: f32) {

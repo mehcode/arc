@@ -10,10 +10,12 @@ fn main() {
 
     let mut cell = Text::new(&c);
     cell.set_flex_grow(1.);
-    cell.set_font_family("Input Mono");
+    cell.set_font_family("Futura");
     cell.set_text("Firefox Nightly");
-    cell.set_text_size(16.);
+    cell.set_text_size(20.);
     cell.set_background_color(0xff_d2d2d2);
+    cell.set_text_color(0xff_525252);
+    cell.set_position(Edge::Top, -10.);
     // cell.set_font_weight(600);
 
     let mut inner = View::new(&c);
