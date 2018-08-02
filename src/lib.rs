@@ -11,6 +11,7 @@ mod events;
 mod geometry;
 mod node;
 mod os;
+mod font;
 mod text;
 mod view;
 mod window;
@@ -20,4 +21,5 @@ pub use yoga::{Align, Edge, FlexDirection, Justify, PositionType, Wrap};
 
 pub use self::{
     color::*, context::*, event::*, events::*, geometry::*, node::*, text::*, view::*, window::*,
+    font::*,
 };
