@@ -1,5 +1,5 @@
 pub struct Event<T> {
-    handlers: Vec<Box<FnMut(&T) -> () + Send + 'static>>,
+    handlers: Vec<Box<dyn FnMut(&T) -> () + Send + 'static>>,
 }
 
 // TODO: Return a handle to the event handler that can be acted on to unsubscribe (?)

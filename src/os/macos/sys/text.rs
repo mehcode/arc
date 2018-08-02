@@ -1,7 +1,5 @@
-use super::{current_context, view};
-use super::super::node::yoga_from_handle;
+use super::{super::node::yoga_from_handle, current_context, view};
 use cocoa::{base::id, foundation::NSRect};
-use color::Color;
 use core_foundation::{
     attributed_string::CFMutableAttributedString,
     base::{CFRange, FromMutVoid, FromVoid, TCFType, ToVoid},
@@ -13,9 +11,13 @@ use core_graphics::{
     path::CGPath,
 };
 use core_text::{font::CTFont, framesetter::CTFramesetter};
+use crate::color::Color;
+use lazy_static::*;
 use objc::{
     declare::ClassDecl,
+    msg_send,
     runtime::{Class, Object, Sel},
+    sel, sel_impl,
 };
 use std::{mem, os::raw::c_void, ptr};
 

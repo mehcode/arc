@@ -1,6 +1,7 @@
 use super::{node::Node, sys};
 use cocoa::base::id;
-use color::Color;
+use crate::color::Color;
+use objc::{msg_send, sel, sel_impl};
 
 pub(crate) struct Text(pub(crate) id);
 

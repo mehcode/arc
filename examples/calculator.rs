@@ -114,7 +114,7 @@ fn op_button(c: &Context, op: Operator) -> View {
     button
 }
 
-fn digit_button(c: &Context, digit: u8) -> View {
+fn digit_button(c: &Context, _digit: u8) -> View {
     let mut button = button(c);
     button.set_background_color(0xfff2f2f6);
     button

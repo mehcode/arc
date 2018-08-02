@@ -9,9 +9,12 @@ use cocoa::{
     foundation::{NSAutoreleasePool, NSProcessInfo, NSString},
 };
 use dispatch;
+use lazy_static::*;
 use objc::{
     declare::ClassDecl,
+    msg_send,
     runtime::{Class, Object, Sel, BOOL},
+    sel, sel_impl,
 };
 use std::cell::Cell;
 

@@ -1,9 +1,10 @@
-use super::{super::super::Color, Node};
 use cocoa::{
     appkit::{NSBackingStoreType, NSWindow, NSWindowStyleMask},
     base::{class, id, nil, NO, YES},
     foundation::{NSPoint, NSRect, NSSize, NSString},
 };
+use crate::{Color, Node};
+use objc::{msg_send, sel, sel_impl};
 
 pub(crate) struct Window(pub(crate) id);
 

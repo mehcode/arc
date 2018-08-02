@@ -4,10 +4,10 @@ pub(crate) mod view;
 
 use cocoa::base::class;
 use core_graphics::context::CGContextRef;
+use crate::Event;
 use foreign_types_shared::ForeignTypeRef;
-use objc::runtime::Object;
+use objc::{msg_send, runtime::Object, sel, sel_impl};
 use std::os::raw::c_void;
-use Event;
 
 #[inline]
 pub(crate) fn event<'a, T>(this: *mut Object, name: &'static str) -> &'a mut Event<T> {
