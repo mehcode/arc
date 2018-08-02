@@ -8,10 +8,10 @@ mod color;
 mod context;
 mod event;
 mod events;
+mod font;
 mod geometry;
 mod node;
 mod os;
-mod font;
 mod text;
 mod view;
 mod window;
@@ -20,6 +20,6 @@ mod window;
 pub use yoga::{Align, Edge, FlexDirection, Justify, PositionType, Wrap};
 
 pub use self::{
-    color::*, context::*, event::*, events::*, geometry::*, node::*, text::*, view::*, window::*,
-    font::*,
+    color::*, context::*, event::*, events::*, font::*, geometry::*, layout::*, node::*, text::*,
+    view::*, window::*,
 };

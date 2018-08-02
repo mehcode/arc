@@ -1,5 +1,4 @@
-use crate::os;
-use crate::{WeakContext, Context};
+use crate::{os, Context, WeakContext};
 
 pub struct Font {
     crate inner: os::Font,
@@ -59,7 +58,7 @@ impl FontBuilder {
     #[inline]
     pub fn build(&self) -> Font {
         Font {
-            inner: os::Font::new(&self.family, self.weight, self.italic)
+            inner: os::Font::new(&self.family, self.weight, self.italic),
         }
     }
 }

@@ -1,6 +1,6 @@
 use super::{
     os::{self, Node as OsNode},
-    Align, Color, Context, Edge, Node, NodeId, PositionType, Font,
+    Align, Color, Context, Edge, Font, Gravity, Node, NodeId, PositionType,
 };
 use yoga;
 
@@ -20,6 +20,15 @@ impl Text {
     #[inline]
     pub fn set_text(&mut self, text: impl AsRef<str>) {
         self.inner.set_text(text.as_ref());
+    }
+
+    //
+    // Layout
+    //
+
+    #[inline]
+    pub fn set_gravity(&mut self, gravity: Gravity) {
+        self.inner.set_gravity(gravity);
     }
 
     //

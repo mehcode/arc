@@ -1,7 +1,11 @@
-use super::{node::Node, sys};
 use cocoa::base::id;
-use crate::color::Color;
-use crate::os::Font;
+use crate::{
+    os::{
+        macos::{node::Node, sys},
+        Font,
+    },
+    Color, Gravity,
+};
 use objc::{msg_send, sel, sel_impl};
 
 pub(crate) struct Text(pub(crate) id);
@@ -20,6 +24,15 @@ impl Text {
     #[inline]
     pub(crate) fn set_text(&mut self, text: &str) {
         sys::text::set_text(self.0, text);
+    }
+
+    //
+    // Layout
+    //
+
+    #[inline]
+    pub(crate) fn set_gravity(&mut self, gravity: Gravity) {
+        sys::text::set_gravity(self.0, gravity);
     }
 
     //

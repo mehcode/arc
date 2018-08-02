@@ -1,3 +1,36 @@
+use bitflags::*;
+
+bitflags! {
+    pub struct Gravity: u16 {
+        /// Push content to the top of its container.
+        const TOP = 0x00_30;
+
+        /// Push content to the bottom of its container.
+        const BOTTOM = 0x00_50;
+
+        /// Push content to the start (left in LTR or right in RTL) of its container.
+        const START = 0x08_03;
+
+        /// Push content to the end (right in LTR or left in RTL) of its container.
+        const END = 0x08_05;
+
+        /// Push content to the left of its container.
+        const LEFT = 0x00_03;
+
+        /// Push content to the right of its container.
+        const RIGHT = 0x00_05;
+
+        /// Place content in the horizontal center of its container.
+        const CENTER_HORIZONTAL = 0x00_01;
+
+        /// Place content in the vertical center of its container.
+        const CENTER_VERTICAL = 0x00_10;
+
+        /// Place content in the horizontal and vertical center of its container.
+        const CENTER = 0x00_01 | 0x00_10;
+    }
+}
+
 macro_rules! impl_layout {
     ($ty:ident) => {
         impl $ty {
