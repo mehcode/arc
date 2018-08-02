@@ -1,16 +1,17 @@
-use super::{super::node::yoga_from_handle, current_context, view};
+use crate::os::macos::yoga_from_handle;
+use crate::os::macos::sys::{current_context, view};
 use cocoa::{base::id, foundation::NSRect};
 use core_foundation::{
     attributed_string::CFMutableAttributedString,
     base::{CFRange, FromMutVoid, FromVoid, TCFType, ToVoid},
-    string::{CFString, CFStringRef},
+    string::{CFStringRef},
 };
 use core_graphics::{
     base::CGFloat,
     geometry::{CGRect, CG_AFFINE_TRANSFORM_IDENTITY},
     path::CGPath,
 };
-use core_text::{font::CTFont, framesetter::CTFramesetter};
+use core_text::{font::{new_from_descriptor, new_from_name}, font_descriptor::CTFontDescriptor, framesetter::CTFramesetter};
 use crate::color::Color;
 use lazy_static::*;
 use objc::{
@@ -20,6 +21,7 @@ use objc::{
     sel, sel_impl,
 };
 use std::{mem, os::raw::c_void, ptr};
+use crate::os::Font;
 
 lazy_static! {
     pub(crate) static ref CLASS: &'static Class = {
@@ -27,7 +29,7 @@ lazy_static! {
 
         unsafe {
             decl.add_ivar::<*const c_void>("sqText");
-            decl.add_ivar::<*const c_void>("sqFontFamily");
+            decl.add_ivar::<*const c_void>("sqFontDescriptor");
             decl.add_ivar::<CGFloat>("sqFontSize");
             decl.add_ivar::<u16>("sqFontWeight");
             // decl.add_ivar::<*const c_void>("sqFont");
@@ -61,8 +63,7 @@ extern "C" fn init(this: &Object, _: Sel) -> id {
         mem::forget(text);
     }
 
-    set_font_size(this, 14.);
-    set_font_family(this, ".SF NS Text");
+    set_text_size(this, 14.);
 
     this
 }
@@ -92,7 +93,7 @@ macro_rules! cf_release {
 
 extern "C" fn dealloc(this: &mut Object, _: Sel) {
     cf_release!(this, "sqText");
-    cf_release!(this, "sqFontFamily");
+    cf_release!(this, "sqFontDescriptor");
     // cf_release!(this, "sqFont");
     // cf_release!(this, "sqFramesetter");
 
@@ -112,9 +113,15 @@ extern "C" fn draw_rect(this: &mut Object, _: Sel, dirty_rect: NSRect) {
 
     // TODO: Only create (and set) CTFont if needed
 
-    let font_family = unsafe { CFString::from_void(*this.get_ivar("sqFontFamily")) };
     let font_size: CGFloat = unsafe { *this.get_ivar("sqFontSize") };
-    let font = CTFont::new_from_name(&font_family, font_size).unwrap();
+    let font_descriptor_ptr = unsafe { this.get_ivar::<*const c_void>("sqFontDescriptor") };
+    let font = if font_descriptor_ptr.is_null() {
+        // No set font descriptor; use default font
+        new_from_name(".SF NS Text", font_size).unwrap()
+    } else {
+        let font_descriptor = unsafe { CTFontDescriptor::from_void(*font_descriptor_ptr) };
+        new_from_descriptor(&font_descriptor, font_size)
+    };
 
     let range = CFRange::init(0, text.char_len());
     unsafe { text.set_attribute(range, kCTFontAttributeName, font) };
@@ -178,28 +185,27 @@ pub(crate) fn set_text_color(this: id, color: Color) {
     // TODO: set_needs_display()
 }
 
-pub(crate) fn set_font_family(this: id, family: &str) {
-    // Release existing fontFamily (if set)
-    cf_release!(&mut *this, "sqFontFamily");
+pub(crate) fn set_font(this: id, font: &Font) {
+    // Release existing font descriptor
+    cf_release!(&mut *this, "sqFontDescriptor");
 
-    let family: CFString = family.into();
+    // Clone the font object (which makes a new reference of the same descriptor in ObjC)
+    let font = font.clone();
 
     unsafe {
         (*this).set_ivar(
-            "sqFontFamily",
-            family.as_concrete_TypeRef() as *const c_void,
+            "sqFontDescriptor",
+            font.0.as_concrete_TypeRef() as *const c_void,
         );
     }
 
     // Memory to be released in dealloc
-    mem::forget(family);
+    mem::forget(font);
 
     // TODO: set_needs_display()
 }
 
-pub(crate) fn set_font_size(this: id, size: f32) {
-    // cf_release!(&mut *this, "sqFont");
-
+pub(crate) fn set_text_size(this: id, size: f32) {
     unsafe {
         (*this).set_ivar("sqFontSize", CGFloat::from(size));
     }

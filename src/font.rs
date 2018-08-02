@@ -1,27 +1,36 @@
 use crate::os;
+use crate::{WeakContext, Context};
 
 pub struct Font {
-    inner: os::Font,
+    crate inner: os::Font,
 }
 
 impl Font {
     #[inline]
-    pub fn builder() -> FontBuilder {
-        FontBuilder::new()
+    pub fn builder(context: &Context) -> FontBuilder {
+        FontBuilder::new(context)
     }
 }
 
-#[derive(Default)]
 pub struct FontBuilder {
     family: &'static str,
     weight: u16,
     italic: bool,
+
+    // NOTE: Currently this is only here to force Fonts to be made after `Context` creation
+    #[allow(dead_code)]
+    context: WeakContext,
 }
 
 impl FontBuilder {
     #[inline]
-    pub fn new() -> Self {
-        FontBuilder::default()
+    pub fn new(context: &Context) -> Self {
+        FontBuilder {
+            family: ".SF NS Text",
+            weight: 400,
+            italic: false,
+            context: context.downgrade(),
+        }
     }
 
     // TODO: Should we expose family name as "family" or "name"

@@ -1,16 +1,21 @@
-extern crate arc;
-
+use std::alloc::System;
 use arc::*;
+
+#[global_allocator]
+static GLOBAL: System = System;
 
 fn main() {
     let c = Context::new();
+
+    // TODO: Look for a way to make this `const` or `static` (?)
+    let iosevka_500 = Font::builder(&c).name("Iosevka").weight(500).build();
 
     let mut window = Window::new(&c, 375., 640.);
     window.set_title("Playground");
 
     let mut cell = Text::new(&c);
     cell.set_flex_grow(1.);
-    cell.set_font_family("Futura");
+    cell.set_font(&iosevka_500);
     cell.set_text("Bacon ipsum dolor amet ground round prosciutto picanha turkey, shank pancetta tail burgdoggen kielbasa chuck kevin boudin. Doner pork loin strip steak fatback burgdoggen, cupim turducken beef ribs chicken bresaola andouille shoulder alcatra hamburger filet mignon.\n\nChicken meatloaf beef salami meatball, doner brisket chuck prosciutto landjaeger filet mignon tri-tip capicola. Burgdoggen ham picanha, andouille strip steak meatball spare ribs pork doner pork belly pork loin. ");
     cell.set_text_size(20.);
     cell.set_text_color(0xff_424242);

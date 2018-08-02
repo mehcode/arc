@@ -1,6 +1,6 @@
 use super::{
     os::{self, Node as OsNode},
-    Align, Color, Context, Edge, Node, NodeId, PositionType,
+    Align, Color, Context, Edge, Node, NodeId, PositionType, Font,
 };
 use yoga;
 
@@ -61,8 +61,8 @@ impl Text {
     //
 
     #[inline]
-    pub fn set_font_family(&mut self, family: &str) {
-        self.inner.set_font_family(family);
+    pub fn set_font(&mut self, font: &Font) {
+        self.inner.set_font(&font.inner);
     }
 }
 

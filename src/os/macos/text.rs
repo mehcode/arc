@@ -1,6 +1,7 @@
 use super::{node::Node, sys};
 use cocoa::base::id;
 use crate::color::Color;
+use crate::os::Font;
 use objc::{msg_send, sel, sel_impl};
 
 pub(crate) struct Text(pub(crate) id);
@@ -27,7 +28,7 @@ impl Text {
 
     #[inline]
     pub(crate) fn set_text_size(&mut self, size: f32) {
-        sys::text::set_font_size(self.0, size);
+        sys::text::set_text_size(self.0, size);
     }
 
     #[inline]
@@ -40,8 +41,8 @@ impl Text {
     //
 
     #[inline]
-    pub(crate) fn set_font_family(&mut self, family: &str) {
-        sys::text::set_font_family(self.0, family);
+    pub(crate) fn set_font(&mut self, font: &Font) {
+        sys::text::set_font(self.0, font);
     }
 
     //

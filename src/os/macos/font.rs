@@ -11,7 +11,8 @@ use core_text::font_descriptor::{
     kCTFontTraitsAttribute, kCTFontUIOptimizedTrait, kCTFontWeightTrait, CTFontDescriptor,
 };
 
-pub(crate) struct Font(CTFontDescriptor);
+#[derive(Clone)]
+pub(crate) struct Font(pub(crate) CTFontDescriptor);
 
 impl Font {
     pub(crate) fn new(family: &str, weight: u16, italic: bool) -> Self {
