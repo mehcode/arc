@@ -1,4 +1,4 @@
-use super::{os, Node, NodeId, Window};
+use crate::{os, Node, NodeId};
 use fnv::FnvHashMap;
 use parking_lot::{Mutex, RwLock};
 use std::sync::{
@@ -6,11 +6,12 @@ use std::sync::{
     Arc, Weak,
 };
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct Context {
     inner: Arc<InnerContext>,
 }
 
+#[derive(Default)]
 struct InnerContext {
     inner: os::Context,
     lock: Mutex<()>,
@@ -23,25 +24,13 @@ unsafe impl Sync for InnerContext {}
 
 impl Context {
     pub fn new() -> Self {
-        Self {
-            inner: Arc::new(InnerContext {
-                lock: Mutex::new(()),
-                nodes: RwLock::new(FnvHashMap::default()),
-                next_node_id: AtomicUsize::new(0),
-                inner: os::Context::new(),
-            }),
-        }
+        Self::default()
     }
 
     pub(crate) fn downgrade(&self) -> WeakContext {
         WeakContext {
             inner: Arc::downgrade(&self.inner),
         }
-    }
-
-    pub fn add_window(&self, window: Window) {
-        let _guard = self.inner.lock.lock();
-        self.inner.inner.add_window(window.inner);
     }
 
     pub fn run(&self) {

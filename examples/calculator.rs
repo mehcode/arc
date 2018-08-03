@@ -74,8 +74,8 @@ fn main() {
     main.add(panel);
 
     window.set_view(main);
+    window.show();
 
-    c.add_window(window);
     c.run();
 }
 

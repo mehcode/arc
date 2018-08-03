@@ -34,7 +34,7 @@ fn main() {
     root.add(inner);
 
     window.set_view(root);
+    window.show();
 
-    c.add_window(window);
     c.run();
 }

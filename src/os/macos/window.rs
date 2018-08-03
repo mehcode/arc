@@ -1,6 +1,6 @@
 use cocoa::{
     appkit::{NSBackingStoreType, NSWindow, NSWindowStyleMask},
-    base::{class, id, nil, NO, YES},
+    base::{id, nil, NO, YES},
     foundation::{NSPoint, NSRect, NSSize, NSString},
 };
 use crate::{Color, Node};
@@ -38,6 +38,12 @@ impl Window {
         Window(window)
     }
 
+    crate fn show(&mut self) {
+        unsafe {
+            msg_send![self.0, makeKeyAndOrderFront: nil];
+        }
+    }
+
     pub(crate) fn set_title(&mut self, title: &str) {
         unsafe {
             let title = NSString::alloc(nil).init_str(title);
@@ -57,13 +63,7 @@ impl Window {
 
     pub(crate) fn set_background_color(&mut self, color: Color) {
         unsafe {
-            let color: id = msg_send![class("NSColor"),
-                colorWithRed: color.red as f64
-                       green: color.green as f64
-                        blue: color.blue as f64
-                       alpha: color.alpha as f64];
-
-            msg_send![self.0, setBackgroundColor: color];
+            msg_send![self.0, setBackgroundColor: color.into_nscolor()];
         }
     }
 

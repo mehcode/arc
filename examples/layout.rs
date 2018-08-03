@@ -56,7 +56,7 @@ fn main() {
     root.add(bottom);
 
     window.set_view(root);
+    window.show();
 
-    c.add_window(window);
     c.run();
 }

@@ -90,6 +90,7 @@ extern "C" fn init(this: &Object, _: Sel) -> id {
 
 macro_rules! cf_release {
     ($this:expr, $name:expr) => {
+        #[cfg_attr(feature = "cargo-clippy", allow(unnecessary_mut_passed))]
         let is_null = {
             let value: &*const c_void = unsafe { $this.get_ivar($name) };
             let is_null = value.is_null();

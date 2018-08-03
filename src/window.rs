@@ -13,6 +13,12 @@ impl Window {
         }
     }
 
+    /// Moves the window to the front and shows the window.
+    #[inline]
+    pub fn show(&mut self) {
+        self.inner.show();
+    }
+
     /// Sets whether the window should be resizable.
     ///
     /// Default: `true`.

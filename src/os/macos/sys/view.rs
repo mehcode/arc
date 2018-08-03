@@ -300,7 +300,7 @@ extern "C" fn mouse_down(this: &Object, _: Sel, native_event: id) {
         let event =
             &mut *(*(*this).get_ivar::<*mut c_void>("sqEVTMouseDown") as *mut Event<MouseDown>);
 
-        event.dispatch(MouseDown {
+        event.dispatch(&MouseDown {
             location: location_in_window(this, native_event),
             button: mouse_button(native_event),
         });
@@ -311,7 +311,7 @@ extern "C" fn mouse_up(this: &Object, _: Sel, native_event: id) {
     unsafe {
         let event = &mut *(*(*this).get_ivar::<*mut c_void>("sqEVTMouseUp") as *mut Event<MouseUp>);
 
-        event.dispatch(MouseUp {
+        event.dispatch(&MouseUp {
             location: location_in_window(this, native_event),
             button: mouse_button(native_event),
         });
@@ -323,7 +323,7 @@ extern "C" fn mouse_enter(this: &Object, _: Sel, native_event: id) {
         let event =
             &mut *(*(*this).get_ivar::<*mut c_void>("sqEVTMouseEnter") as *mut Event<MouseEnter>);
 
-        event.dispatch(MouseEnter {
+        event.dispatch(&MouseEnter {
             location: location_in_window(this, native_event),
         });
     }
@@ -334,7 +334,7 @@ extern "C" fn mouse_leave(this: &Object, _: Sel, native_event: id) {
         let event =
             &mut *(*(*this).get_ivar::<*mut c_void>("sqEVTMouseLeave") as *mut Event<MouseLeave>);
 
-        event.dispatch(MouseLeave {
+        event.dispatch(&MouseLeave {
             location: location_in_window(this, native_event),
         });
     }
@@ -362,12 +362,7 @@ fn location_in_window(this: &Object, event: id) -> Point {
 
 pub(crate) fn set_background_color(this: id, color: Color) {
     unsafe {
-        let color: id = msg_send![class("NSColor"),
-                colorWithRed: color.red as f64
-                       green: color.green as f64
-                        blue: color.blue as f64
-                       alpha: color.alpha as f64];
-
+        let color = color.into_nscolor();
         msg_send![color, retain];
 
         (*this).set_ivar::<id>("sqBackgroundColor", color);

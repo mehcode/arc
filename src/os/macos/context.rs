@@ -1,4 +1,3 @@
-use super::Window;
 use cocoa::{
     appkit::{
         NSApp, NSApplication, NSApplicationActivateIgnoringOtherApps,
@@ -22,8 +21,8 @@ pub(crate) struct Context {
     pool: Cell<Option<id>>,
 }
 
-impl Context {
-    pub(crate) fn new() -> Self {
+impl Default for Context {
+    fn default() -> Self {
         let pool = unsafe { NSAutoreleasePool::new(nil) };
         unsafe {
             // Initialize the shared application instance
@@ -62,13 +61,9 @@ impl Context {
             pool: Cell::new(Some(pool)),
         }
     }
+}
 
-    pub(crate) fn add_window(&self, window: Window) {
-        unsafe {
-            msg_send![window.0, makeKeyAndOrderFront: nil];
-        }
-    }
-
+impl Context {
     pub(crate) fn run(&self) {
         let app = unsafe { NSApp() };
 
