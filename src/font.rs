@@ -11,6 +11,7 @@ impl Font {
     }
 }
 
+#[cfg_attr(feature = "cargo-clippy", allow(stutter))]
 pub struct FontBuilder {
     family: &'static str,
     weight: u16,
@@ -24,7 +25,7 @@ pub struct FontBuilder {
 impl FontBuilder {
     #[inline]
     pub fn new(context: &Context) -> Self {
-        FontBuilder {
+        Self {
             family: ".SF NS Text",
             weight: 400,
             italic: false,

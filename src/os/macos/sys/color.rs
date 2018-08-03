@@ -1,10 +1,6 @@
 use super::super::super::super::Color;
 use core_graphics::{base::CGFloat, color::CGColor};
-use objc::{
-    msg_send,
-    runtime::Object,
-    class,
-    sel, sel_impl};
+use objc::{class, msg_send, runtime::Object, sel, sel_impl};
 
 impl Color {
     #[inline]

@@ -22,6 +22,8 @@ impl<T> Event<T> {
 
 impl<T> Default for Event<T> {
     fn default() -> Self {
-        Self { handlers: Vec::new() }
+        Self {
+            handlers: Vec::new(),
+        }
     }
 }

@@ -16,7 +16,7 @@ pub struct Color {
 
 impl Default for Color {
     fn default() -> Self {
-        Color::TRANSPARENT
+        Self::TRANSPARENT
     }
 }
 
@@ -26,19 +26,21 @@ impl Default for Color {
 
 impl Color {
     // TODO: Consider naming `CLEAR`
-    pub const TRANSPARENT: Color = Color {
+    pub const TRANSPARENT: Self = Self {
         red: 0.,
         green: 0.,
         blue: 0.,
         alpha: 0.,
     };
-    pub const WHITE: Color = Color {
+
+    pub const WHITE: Self = Self {
         red: 1.,
         green: 1.,
         blue: 1.,
         alpha: 1.,
     };
-    pub const BLACK: Color = Color {
+
+    pub const BLACK: Self = Self {
         red: 0.,
         green: 0.,
         blue: 0.,
@@ -51,13 +53,13 @@ impl Color {
 //
 
 impl<'a> From<u32> for Color {
-    fn from(argb: u32) -> Color {
+    fn from(argb: u32) -> Self {
         let a = (argb >> 24) as u8;
         let r = (argb >> 16) as u8;
         let g = (argb >> 8) as u8;
         let b = argb as u8;
 
-        Color {
+        Self {
             red: f32::from(r) / 255.,
             blue: f32::from(b) / 255.,
             green: f32::from(g) / 255.,
@@ -67,8 +69,8 @@ impl<'a> From<u32> for Color {
 }
 
 impl<'a> From<&'a [f32; 3]> for Color {
-    fn from(rgb: &'a [f32; 3]) -> Color {
-        Color {
+    fn from(rgb: &'a [f32; 3]) -> Self {
+        Self {
             red: rgb[0],
             green: rgb[1],
             blue: rgb[2],
@@ -78,8 +80,8 @@ impl<'a> From<&'a [f32; 3]> for Color {
 }
 
 impl<'a> From<&'a [f32; 4]> for Color {
-    fn from(argb: &'a [f32; 4]) -> Color {
-        Color {
+    fn from(argb: &'a [f32; 4]) -> Self {
+        Self {
             red: argb[1],
             green: argb[2],
             blue: argb[3],
