@@ -1,8 +1,24 @@
 extern crate arc;
 
 use arc::*;
+use std::{cell::RefCell, rc::Rc};
 
 const PADDING: f32 = 5.;
+
+struct State {
+    // Node ID of the operand label
+    // TODO: Better name
+    operand_label_id: NodeId,
+
+    // Operand being shown and edited
+    operand: Option<f64>,
+
+    // Last operand
+    last_operand: Option<f64>,
+
+    // Pending operation to be performed
+    operator: Option<Operator>,
+}
 
 fn main() {
     let c = Context::new();
@@ -11,54 +27,70 @@ fn main() {
     window.set_title("Calculator");
     window.set_resizable(false);
 
+    let mut label_val = Text::new(&c);
+    label_val.set_text(&(0.).to_string());
+    label_val.set_text_color(0xff_252525);
+    label_val.set_font(&Font::builder(&c).weight(500).build());
+    label_val.set_text_size(46.);
+    label_val.set_flex_grow(1.);
+    label_val.set_gravity(Gravity::END | Gravity::BOTTOM);
+
+    let state = Rc::new(RefCell::new(State {
+        operand_label_id: label_val.id(),
+        operand: None,
+        last_operand: None,
+        operator: None,
+    }));
+
     let mut row0 = View::new(&c);
     row0.set_flex_basis(120.);
     row0.set_background_color(0xffffffff);
-    row0.set_margin(Edge::Bottom, 1.);
+    row0.set_padding(Edge::Horizontal, 12.);
+    row0.add(label_val);
 
     let mut row1 = View::new(&c);
     row1.set_margin(Edge::Vertical, PADDING);
     row1.set_flex_direction(FlexDirection::Row);
     row1.set_flex_basis(75.);
-    row1.add(op_button(&c, Operator::Clear));
-    row1.add(op_button(&c, Operator::InvertSign));
-    row1.add(op_button(&c, Operator::Percent));
-    row1.add(op_button(&c, Operator::Divide));
+    row1.add(op_button(&c, &state, Operator::Clear));
+    row1.add(op_button(&c, &state, Operator::InvertSign));
+    row1.add(op_button(&c, &state, Operator::Percent));
+    row1.add(op_button(&c, &state, Operator::Divide));
 
     let mut row2 = View::new(&c);
     row2.set_margin(Edge::Vertical, PADDING);
     row2.set_flex_direction(FlexDirection::Row);
     row2.set_flex_basis(75.);
-    row2.add(digit_button(&c, 7));
-    row2.add(digit_button(&c, 8));
-    row2.add(digit_button(&c, 9));
-    row2.add(op_button(&c, Operator::Multiply));
+    row2.add(digit_button(&c, &state, 7));
+    row2.add(digit_button(&c, &state, 8));
+    row2.add(digit_button(&c, &state, 9));
+    row2.add(op_button(&c, &state, Operator::Multiply));
 
     let mut row3 = View::new(&c);
     row3.set_margin(Edge::Vertical, PADDING);
     row3.set_flex_direction(FlexDirection::Row);
     row3.set_flex_basis(75.);
-    row3.add(digit_button(&c, 4));
-    row3.add(digit_button(&c, 5));
-    row3.add(digit_button(&c, 6));
-    row3.add(op_button(&c, Operator::Subtract));
+    row3.add(digit_button(&c, &state, 4));
+    row3.add(digit_button(&c, &state, 5));
+    row3.add(digit_button(&c, &state, 6));
+    row3.add(op_button(&c, &state, Operator::Subtract));
 
     let mut row4 = View::new(&c);
     row4.set_margin(Edge::Vertical, PADDING);
     row4.set_flex_direction(FlexDirection::Row);
     row4.set_flex_basis(75.);
-    row4.add(digit_button(&c, 1));
-    row4.add(digit_button(&c, 2));
-    row4.add(digit_button(&c, 3));
-    row4.add(op_button(&c, Operator::Add));
+    row4.add(digit_button(&c, &state, 1));
+    row4.add(digit_button(&c, &state, 2));
+    row4.add(digit_button(&c, &state, 3));
+    row4.add(op_button(&c, &state, Operator::Add));
 
     let mut row5 = View::new(&c);
     row5.set_margin(Edge::Vertical, PADDING);
     row5.set_flex_direction(FlexDirection::Row);
     row5.set_flex_basis(75.);
-    row5.add(digit_button(&c, 0));
-    row5.add(op_button(&c, Operator::Decimal));
-    row5.add(op_button_2x(&c, Operator::Solve));
+    row5.add(digit_button(&c, &state, 0));
+    row5.add(op_button(&c, &state, Operator::Decimal));
+    row5.add(op_button_2x(&c, &state, Operator::Solve));
 
     let mut panel = View::new(&c);
     panel.set_padding(Edge::All, PADDING);
@@ -79,6 +111,7 @@ fn main() {
     c.run();
 }
 
+#[derive(Debug, PartialEq, Clone, Copy)]
 enum Operator {
     Clear,
     InvertSign,
@@ -91,39 +124,192 @@ enum Operator {
     Solve,
 }
 
-fn button(c: &Context) -> View {
-    let mut button = View::new(c);
+impl Operator {
+    fn apply(&self, a: f64, b: f64) -> f64 {
+        match *self {
+            Operator::Percent => a % b,
+            Operator::Divide => a / b,
+            Operator::Multiply => a * b,
+            Operator::Subtract => a - b,
+            Operator::Add => a + b,
+
+            _ => unreachable!(),
+        }
+    }
+}
+
+fn button(c: &Context) -> Text {
+    let mut button = Text::new(c);
     button.set_flex_basis(75.);
     button.set_margin(Edge::Horizontal, 5.);
     button.set_corner_radius(6.);
+    button.set_gravity(Gravity::CENTER);
+    button.set_text_color(0xff_353535);
+    button.set_text_size(20.);
+
+    // TODO: Reduce font creation
+    // TODO: Does it make sense to build fonts as a user or use `.set_font_xxx` type functions
+    button.set_font(&Font::builder(c).weight(500).build());
 
     button
 }
 
-fn op_button(c: &Context, op: Operator) -> View {
+fn op_button(c: &Context, state: &Rc<RefCell<State>>, op: Operator) -> Text {
+    let state = state.clone();
     let mut button = button(c);
+    let button_id = button.id();
 
-    let background_color = match op {
-        Operator::Add | Operator::Subtract | Operator::Multiply | Operator::Divide => 0xffbddff9,
-        Operator::Solve => 0xff0070e5,
-        Operator::Clear => 0xffffd5d4,
-        _ => 0xfff2f2f6,
+    let (background_color, background_color_pressed, color) = match op {
+        Operator::Add | Operator::Subtract | Operator::Multiply | Operator::Divide => {
+            (0xff_bddff9, 0xff_6cb8f1, 0xff_0070e5)
+        }
+        Operator::Solve => (0xff_0070e5, 0xff_0059b7, 0xff_ffffff),
+        Operator::Clear => (0xff_ffd5d4, 0xff_ff7976, 0xff_dd5353),
+        _ => (0xff_f2f2f2, 0xff_c2c2c2, 0xff_858585),
     };
 
+    let ch = match op {
+        Operator::Add => "+",
+        Operator::Subtract => "\u{2212}",
+        Operator::Multiply => "\u{00D7}",
+        Operator::Divide => "\u{00F7}",
+        Operator::Solve => "=",
+        Operator::Percent => "%",
+        Operator::Clear => "AC",
+        Operator::InvertSign => "\u{00B1}",
+        Operator::Decimal => ".",
+    };
+
+    button.set_text(ch);
+    button.set_text_color(color);
     button.set_background_color(background_color);
+
+    // Downgrade to a WeakContext to allow safely storing in a closure to not cause a ref cycle
+    let c = c.downgrade();
+
+    button.mouse_down().add({
+        // Cloning a WeakContext is "free"
+        let c = c.clone();
+        move |_| {
+            // Upgrade to a Context (should succeed as long as the context has not dropped)
+            if let Some(c) = c.upgrade() {
+                // Set the background to the pressed state
+                c.update_by_id(button_id, |button: &mut Text| {
+                    button.set_background_color(background_color_pressed);
+                });
+            }
+        }
+    });
+
+    button.mouse_up().add(move |_| {
+        let mut state = state.borrow_mut();
+
+        match op {
+            Operator::Clear => {
+                state.operand = None;
+                state.last_operand = None;
+                state.operator = None;
+            }
+
+            Operator::Add
+            | Operator::Subtract
+            | Operator::Multiply
+            | Operator::Divide
+            | Operator::Percent => {
+                if let Some(operator) = &state.operator {
+                    if let Some(operand) = state.operand {
+                        if let Some(last_operand) = state.last_operand {
+                            state.operand = Some(operator.apply(last_operand, operand));
+                        }
+                    }
+                }
+
+                state.operator = Some(op);
+            }
+
+            _ => {}
+        }
+
+        if let Some(operand) = state.operand.take() {
+            state.last_operand = Some(operand);
+        }
+
+        let operand_str = state.last_operand.unwrap_or_default().to_string();
+
+        // Upgrade to a Context (should succeed as long as the context has not dropped)
+        if let Some(c) = c.upgrade() {
+            // Set the background to the normal state
+            c.update_by_id(button_id, |button: &mut Text| {
+                button.set_background_color(background_color);
+            });
+
+            // Update the operand label
+            c.update_by_id(state.operand_label_id, |operand_label: &mut Text| {
+                operand_label.set_text(&operand_str);
+            });
+        }
+    });
+
     button
 }
 
-fn digit_button(c: &Context, _digit: u8) -> View {
+fn digit_button(c: &Context, state: &Rc<RefCell<State>>, digit: u8) -> Text {
+    const BACKGROUND_COLOR_NORMAL: u32 = 0xff_f2f2f2;
+    const BACKGROUND_COLOR_PRESSED: u32 = 0xff_c2c2c2;
+
+    let state = state.clone();
+
     let mut button = button(c);
-    button.set_background_color(0xfff2f2f6);
+    button.set_text(&digit.to_string());
+    button.set_background_color(BACKGROUND_COLOR_NORMAL);
+
+    let button_id = button.id();
+
+    // Downgrade to a WeakContext to allow safely storing in a closure to not cause a ref cycle
+    let c = c.downgrade();
+
+    button.mouse_down().add({
+        // Cloning a WeakContext is "free"
+        let c = c.clone();
+        move |_| {
+            // Upgrade to a Context (should succeed as long as the context has not dropped)
+            if let Some(c) = c.upgrade() {
+                // Set the background to the pressed state
+                c.update_by_id(button_id, |button: &mut Text| {
+                    button.set_background_color(BACKGROUND_COLOR_PRESSED);
+                });
+            }
+        }
+    });
+
+    button.mouse_up().add(move |_| {
+        let mut state = state.borrow_mut();
+
+        // Add a new digit to the end
+        state.operand = Some((state.operand.unwrap_or_default() * 10.) + f64::from(digit));
+
+        let operand_str = state.operand.unwrap_or_default().to_string();
+
+        // Upgrade to a Context (should succeed as long as the context has not dropped)
+        if let Some(c) = c.upgrade() {
+            // Set the background to the normal state
+            c.update_by_id(button_id, |button: &mut Text| {
+                button.set_background_color(BACKGROUND_COLOR_NORMAL);
+            });
+
+            // Update the operand label
+            c.update_by_id(state.operand_label_id, |operand_label: &mut Text| {
+                operand_label.set_text(&operand_str);
+            });
+        }
+    });
+
     button
 }
 
-fn op_button_2x(c: &Context, op: Operator) -> View {
-    let mut button = op_button(c, op);
+fn op_button_2x(c: &Context, state: &Rc<RefCell<State>>, op: Operator) -> Text {
+    let mut button = op_button(c, state, op);
     // TODO: button.set_flex_basis(button.flex_basis() * 2.);
     button.set_flex_basis(160.);
-
     button
 }
