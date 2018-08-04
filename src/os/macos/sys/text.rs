@@ -21,7 +21,7 @@ use core_text::{
 use crate::{
     os::{
         macos::{
-            sys::{current_context, view},
+            sys::{current_context, set_needs_display, view},
             yoga_from_handle,
         },
         Font,
@@ -267,7 +267,7 @@ pub(crate) fn set_text(this: id, string: &str) {
     let text_len = text.char_len();
     text.replace_str(&string.into(), CFRange::init(0, text_len));
 
-    // TODO: set_needs_display()
+    set_needs_display(this);
 }
 
 pub(crate) fn set_text_color(this: id, color: Color) {
@@ -325,26 +325,6 @@ const kCTTextAlignmentRight: u8 = 1;
 const kCTTextAlignmentCenter: u8 = 2;
 
 const kCTParagraphStyleSpecifierAlignment: u32 = 0;
-
-/*
-    kCTParagraphStyleSpecifierFirstLineHeadIndent = 1,
-    kCTParagraphStyleSpecifierHeadIndent = 2,
-    kCTParagraphStyleSpecifierTailIndent = 3,
-    kCTParagraphStyleSpecifierTabStops = 4,
-    kCTParagraphStyleSpecifierDefaultTabInterval = 5,
-    kCTParagraphStyleSpecifierLineBreakMode = 6,
-    kCTParagraphStyleSpecifierLineHeightMultiple = 7,
-    kCTParagraphStyleSpecifierMaximumLineHeight = 8,
-    kCTParagraphStyleSpecifierMinimumLineHeight = 9,
-    kCTParagraphStyleSpecifierLineSpacing = 10,			/* deprecated */
-    kCTParagraphStyleSpecifierParagraphSpacing = 11,
-    kCTParagraphStyleSpecifierParagraphSpacingBefore = 12,
-    kCTParagraphStyleSpecifierBaseWritingDirection = 13,
-    kCTParagraphStyleSpecifierMaximumLineSpacing = 14,
-    kCTParagraphStyleSpecifierMinimumLineSpacing = 15,
-    kCTParagraphStyleSpecifierLineSpacingAdjustment = 16,
-    kCTParagraphStyleSpecifierLineBoundsOptions = 17,
-*/
 
 #[repr(C)]
 struct CTParagraphStyleSetting {

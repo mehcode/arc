@@ -1,10 +1,11 @@
 use cocoa::base::id;
 use crate::{
+    events,
     os::{
         macos::{node::Node, sys},
         Font,
     },
-    Color, Gravity,
+    Color, Event, Gravity,
 };
 use objc::{msg_send, sel, sel_impl};
 
@@ -70,6 +71,30 @@ impl Text {
     #[inline]
     pub(crate) fn set_corner_radius(&mut self, radius: f32) {
         sys::view::set_corner_radius(self.0, radius);
+    }
+
+    //
+    // Events
+    //
+
+    #[inline]
+    pub(crate) fn mouse_down(&mut self) -> &mut Event<events::MouseDown> {
+        sys::event(self.0, "sqEVTMouseDown")
+    }
+
+    #[inline]
+    pub(crate) fn mouse_up(&mut self) -> &mut Event<events::MouseUp> {
+        sys::event(self.0, "sqEVTMouseUp")
+    }
+
+    #[inline]
+    pub(crate) fn mouse_enter(&mut self) -> &mut Event<events::MouseEnter> {
+        sys::event(self.0, "sqEVTMouseEnter")
+    }
+
+    #[inline]
+    pub(crate) fn mouse_leave(&mut self) -> &mut Event<events::MouseLeave> {
+        sys::event(self.0, "sqEVTMouseLeave")
     }
 }
 

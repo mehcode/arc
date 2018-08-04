@@ -27,7 +27,7 @@ impl Context {
         Self::default()
     }
 
-    pub(crate) fn downgrade(&self) -> WeakContext {
+    pub fn downgrade(&self) -> WeakContext {
         WeakContext {
             inner: Arc::downgrade(&self.inner),
         }
@@ -56,12 +56,12 @@ impl Context {
 }
 
 #[derive(Clone)]
-pub(crate) struct WeakContext {
+pub struct WeakContext {
     inner: Weak<InnerContext>,
 }
 
 impl WeakContext {
-    pub(crate) fn upgrade(&self) -> Option<Context> {
+    pub fn upgrade(&self) -> Option<Context> {
         Some(Context {
             inner: self.inner.upgrade()?,
         })

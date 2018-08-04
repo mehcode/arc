@@ -57,6 +57,11 @@ fn declare() -> &'static Class {
         );
 
         decl.add_method(
+            sel!(acceptsFirstMouse:),
+            accepts_first_mouse as extern "C" fn(_: &Object, _: Sel, _: id) -> BOOL,
+        );
+
+        decl.add_method(
             sel!(layout),
             layout as extern "C" fn(_: &mut Object, _: Sel),
         );
@@ -253,6 +258,10 @@ extern "C" fn layout(this: &mut Object, _: Sel) {
 }
 
 extern "C" fn is_flipped(_: &Object, _: Sel) -> BOOL {
+    YES
+}
+
+extern "C" fn accepts_first_mouse(_: &Object, _: Sel, _: id) -> BOOL {
     YES
 }
 

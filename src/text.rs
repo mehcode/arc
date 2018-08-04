@@ -1,6 +1,7 @@
 use super::{
+    events,
     os::{self, Node as OsNode},
-    Align, Color, Context, Edge, Font, Gravity, Node, NodeId, PositionType,
+    Align, Color, Context, Edge, Event, Font, Gravity, Node, NodeId, PositionType,
 };
 use yoga;
 
@@ -72,6 +73,31 @@ impl Text {
     #[inline]
     pub fn set_font(&mut self, font: &Font) {
         self.inner.set_font(&font.inner);
+    }
+
+    //
+    // Events
+    // TODO: Documentation
+    //
+
+    #[inline]
+    pub fn mouse_down(&mut self) -> &mut Event<events::MouseDown> {
+        self.inner.mouse_down()
+    }
+
+    #[inline]
+    pub fn mouse_up(&mut self) -> &mut Event<events::MouseUp> {
+        self.inner.mouse_up()
+    }
+
+    #[inline]
+    pub fn mouse_enter(&mut self) -> &mut Event<events::MouseEnter> {
+        self.inner.mouse_enter()
+    }
+
+    #[inline]
+    pub fn mouse_leave(&mut self) -> &mut Event<events::MouseLeave> {
+        self.inner.mouse_leave()
     }
 }
 
