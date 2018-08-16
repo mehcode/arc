@@ -12,18 +12,22 @@ use lazy_static::*;
 use objc::{
     declare::ClassDecl,
     msg_send,
-    runtime::{Class, Object, Sel, BOOL},
+    runtime::{Class, Object, Sel, BOOL, objc_autoreleasePoolPush, objc_autoreleasePoolPop},
     sel, sel_impl,
 };
 use std::cell::Cell;
+use std::os::raw::c_void;
 
 pub(crate) struct Context {
-    pool: Cell<Option<id>>,
+    pool: Cell<Option<*mut c_void>>,
 }
 
 impl Default for Context {
     fn default() -> Self {
-        let pool = unsafe { NSAutoreleasePool::new(nil) };
+        let pool = unsafe {
+            objc_autoreleasePoolPush()
+        };
+
         unsafe {
             // Initialize the shared application instance
             let app: id = NSApp();
@@ -84,10 +88,15 @@ impl Context {
 
         if let Some(pool) = self.pool.take() {
             unsafe {
-                // Release the setup NSAutoReleasePool.
-                msg_send![pool, release];
+                // Release initialization auto release pool
+                objc_autoreleasePoolPop(pool);
             }
         }
+
+        self.pool.set(Some(unsafe {
+            // Push a new pool
+            objc_autoreleasePoolPush()
+        }));
 
         unsafe {
             msg_send![app, run];
@@ -109,7 +118,7 @@ impl Drop for Context {
     fn drop(&mut self) {
         if let Some(pool) = self.pool.take() {
             unsafe {
-                msg_send![pool, release];
+                objc_autoreleasePoolPop(pool);
             }
         }
     }
