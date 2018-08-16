@@ -12,11 +12,10 @@ use lazy_static::*;
 use objc::{
     declare::ClassDecl,
     msg_send,
-    runtime::{Class, Object, Sel, BOOL, objc_autoreleasePoolPush, objc_autoreleasePoolPop},
+    runtime::{objc_autoreleasePoolPop, objc_autoreleasePoolPush, Class, Object, Sel, BOOL},
     sel, sel_impl,
 };
-use std::cell::Cell;
-use std::os::raw::c_void;
+use std::{cell::Cell, os::raw::c_void};
 
 pub(crate) struct Context {
     pool: Cell<Option<*mut c_void>>,
@@ -24,9 +23,7 @@ pub(crate) struct Context {
 
 impl Default for Context {
     fn default() -> Self {
-        let pool = unsafe {
-            objc_autoreleasePoolPush()
-        };
+        let pool = unsafe { objc_autoreleasePoolPush() };
 
         unsafe {
             // Initialize the shared application instance

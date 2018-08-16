@@ -160,9 +160,9 @@ macro_rules! impl_layout {
             /// Sets the width (in % of the parent) for this view.
             pub fn set_width_percent(&mut self, width: f32) {
                 self.inner
-                    .yoga()
-                    // TODO: Get feedback if this behavior makes sense
-                    .set_width(yoga::StyleUnit::Percent((width * 100.).into()));
+                            .yoga()
+                            // TODO: Get feedback if this behavior makes sense
+                            .set_width(yoga::StyleUnit::Percent((width * 100.).into()));
 
                 self.inner.set_needs_layout();
             }
@@ -179,9 +179,9 @@ macro_rules! impl_layout {
             /// Sets the height (in % of the parent) for this view.
             pub fn set_height_percent(&mut self, height: f32) {
                 self.inner
-                    .yoga()
-                    // TODO: Get feedback if this behavior makes sense
-                    .set_height(yoga::StyleUnit::Percent((height * 100.).into()));
+                            .yoga()
+                            // TODO: Get feedback if this behavior makes sense
+                            .set_height(yoga::StyleUnit::Percent((height * 100.).into()));
 
                 self.inner.set_needs_layout();
             }

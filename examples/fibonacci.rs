@@ -12,7 +12,7 @@ fn recursive_view(c: &Context, value: i16) -> View {
     } else {
         if (value - 1) % 4 == 0 {
             (FlexDirection::ColumnReverse, 0xff_f3c99f)
-        }else {
+        } else {
             (FlexDirection::Column, 0xff_f5b3ac)
         }
     };
@@ -39,7 +39,6 @@ fn recursive_view(c: &Context, value: i16) -> View {
     root.add(bview);
     root
 }
-
 
 fn main() {
     let c = Context::new();
