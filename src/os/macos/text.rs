@@ -98,6 +98,14 @@ impl Text {
     }
 }
 
+impl Drop for Text {
+    fn drop(&mut self) {
+        unsafe {
+            msg_send![self.0, release];
+        }
+    }
+}
+
 impl Node for Text {
     #[inline]
     fn handle(&self) -> id {
