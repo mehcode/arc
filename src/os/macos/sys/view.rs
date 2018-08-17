@@ -313,6 +313,12 @@ extern "C" fn mouse_down(this: &Object, _: Sel, native_event: id) {
             button: mouse_button(native_event),
         });
     }
+
+    // TODO: Have some method to stop propagation
+    unsafe {
+        // FIXME: Differentiate mouse buttons here
+        msg_send![super(this, &*class("NSView")), mouseDown: native_event];
+    }
 }
 
 extern "C" fn mouse_up(this: &Object, _: Sel, native_event: id) {
