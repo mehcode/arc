@@ -92,6 +92,11 @@ fn main() {
         move |_| {
             let mut state = state.lock().unwrap();
 
+            // Reset time if not running
+            if !state.is_running {
+                state.instant = Instant::now();
+            }
+
             // Toggle is-running state
             state.is_running = !state.is_running;
 
@@ -137,7 +142,7 @@ fn main() {
     buttons.add(reset_button);
 
     let mut timer_label = Text::new(&cx);
-    timer_label.set_text("00:00:00.00");
+    timer_label.set_text("00:00:00.000");
     timer_label.set_text_size(52.);
     timer_label.set_font(&Font::builder(&cx).name("Iosevka").build());
 
