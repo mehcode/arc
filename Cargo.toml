@@ -7,14 +7,6 @@ edition = "2018"
 authors = ["Ryan Leckey <leckey.ryan@gmail.com>"]
 description = ""
 
-[package.metadata.bundle.example.layout]
-name = "Layout"
-identifier = "io.mehcode.arc.example.layout"
-
-[package.metadata.bundle.example.calculator]
-name = "Calculator"
-identifier = "io.mehcode.arc.example.calculator"
-
 [dependencies]
 lazy_static = "1"
 yoga = "0.2"
