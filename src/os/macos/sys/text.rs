@@ -236,7 +236,7 @@ extern "C" fn draw_rect(this: &mut Object, _: Sel, dirty_rect: NSRect) {
         bounds.size.height = size.height;
     }
 
-    let path = CGPath::new_with_rect(bounds);
+    let path = CGPath::from_rect(bounds, None);
 
     let frame = framesetter.create_frame(CFRange::init(0, 0), &path);
 

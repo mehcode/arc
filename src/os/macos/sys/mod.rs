@@ -2,11 +2,11 @@ mod color;
 pub(crate) mod text;
 pub(crate) mod view;
 
-use cocoa::base::{class, YES};
+use cocoa::base::{YES};
 use core_graphics::context::CGContextRef;
 use crate::Event;
 use foreign_types_shared::ForeignTypeRef;
-use objc::{msg_send, runtime::Object, sel, sel_impl};
+use objc::{msg_send, runtime::Object, sel, sel_impl, class};
 use std::os::raw::c_void;
 
 #[inline]
@@ -24,7 +24,7 @@ pub(crate) fn event<'a, T>(this: *mut Object, name: &'static str) -> &'a mut Eve
 #[inline]
 pub(crate) fn current_context() -> &'static CGContextRef {
     unsafe {
-        let context: *mut Object = msg_send![class("NSGraphicsContext"), currentContext];
+        let context: *mut Object = msg_send![class!(NSGraphicsContext), currentContext];
         let context: *mut c_void = msg_send![context, CGContext];
 
         CGContextRef::from_ptr(context as *mut _)

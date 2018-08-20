@@ -1,7 +1,7 @@
 use super::current_context;
 use cocoa::{
     appkit::NSEvent,
-    base::{class, id},
+    base::{id},
     foundation::{NSPoint, NSRect, NSSize, NSUInteger},
 };
 use core_foundation::base::FromVoid;
@@ -17,6 +17,7 @@ use objc::{
     msg_send,
     runtime::{Class, Object, Sel, BOOL, YES},
     sel, sel_impl,
+    class,
 };
 use std::{os::raw::c_void, ptr};
 use yoga;
@@ -26,8 +27,7 @@ lazy_static! {
 }
 
 fn declare() -> &'static Class {
-    let super_cls = Class::get("NSView").unwrap();
-    let mut decl = ClassDecl::new("SQView", super_cls).unwrap();
+    let mut decl = ClassDecl::new("SQView", class!(NSView)).unwrap();
 
     unsafe {
         // Yoga Node (ivar)
@@ -275,7 +275,7 @@ extern "C" fn draw_rect(this: &Object, _: Sel, dirty_rect: NSRect) {
             let bounds: NSRect = msg_send![this, bounds];
 
             // NSPath instance ownership transferred to CGContext later in function
-            let path: id = msg_send![class("NSBezierPath"), bezierPathWithRoundedRect: bounds xRadius: radius yRadius: radius];
+            let path: id = msg_send![class!(NSBezierPath), bezierPathWithRoundedRect: bounds xRadius: radius yRadius: radius];
             let path: *mut c_void = msg_send![path, CGPath];
 
             CGPathRef::from_ptr(path as *mut _)
@@ -299,7 +299,7 @@ extern "C" fn draw_rect(this: &Object, _: Sel, dirty_rect: NSRect) {
 
     unsafe {
         // Draw subviews (on top of background)
-        msg_send![super(this, &*class("NSView")), drawRect: dirty_rect];
+        msg_send![super(this, &*class!(NSView)), drawRect: dirty_rect];
     }
 }
 
@@ -317,7 +317,7 @@ extern "C" fn mouse_down(this: &Object, _: Sel, native_event: id) {
     // TODO: Have some method to stop propagation
     unsafe {
         // FIXME: Differentiate mouse buttons here
-        msg_send![super(this, &*class("NSView")), mouseDown: native_event];
+        msg_send![super(this, &*class!(NSView)), mouseDown: native_event];
     }
 }
 

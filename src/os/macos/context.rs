@@ -4,7 +4,7 @@ use cocoa::{
         NSApplicationActivationPolicy, NSApplicationActivationPolicyProhibited,
         NSApplicationActivationPolicyRegular, NSMenu, NSMenuItem, NSRunningApplication,
     },
-    base::{class, id, nil, YES},
+    base::{id, nil, YES},
     foundation::{NSAutoreleasePool, NSProcessInfo, NSString},
 };
 use dispatch;
@@ -12,6 +12,7 @@ use lazy_static::*;
 use objc::{
     declare::ClassDecl,
     msg_send,
+    class,
     runtime::{objc_autoreleasePoolPop, objc_autoreleasePoolPush, Class, Object, Sel, BOOL},
     sel, sel_impl,
 };
@@ -101,7 +102,7 @@ impl Context {
     }
 
     pub(crate) fn execute_on_main_thread(&self, callback: impl FnOnce() -> () + Send) {
-        let is_main_thread: bool = unsafe { msg_send![class("NSThread"), isMainThread] };
+        let is_main_thread: bool = unsafe { msg_send![class!(NSThread), isMainThread] };
 
         if is_main_thread {
             callback();
@@ -153,7 +154,7 @@ extern "C" fn should_terminate_after_last_window_closed(_: &Object, _: Sel, _: i
 // This allows us to cleanly exit the runloop on the rust side
 extern "C" fn should_terminate(_: &Object, _: Sel, _: id) -> i32 {
     unsafe {
-        let app: id = msg_send![class("NSApplication"), sharedApplication];
+        let app: id = msg_send![class!(NSApplication), sharedApplication];
         msg_send![app, stop: nil];
     }
 
