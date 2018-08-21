@@ -2,11 +2,11 @@ mod color;
 pub(crate) mod text;
 pub(crate) mod view;
 
-use cocoa::base::{YES};
+use cocoa::base::YES;
 use core_graphics::context::CGContextRef;
 use crate::Event;
 use foreign_types_shared::ForeignTypeRef;
-use objc::{msg_send, runtime::Object, sel, sel_impl, class};
+use objc::{class, msg_send, runtime::Object, sel, sel_impl};
 use std::os::raw::c_void;
 
 #[inline]
@@ -17,7 +17,7 @@ pub(crate) fn set_needs_display(this: *mut Object) {
 }
 
 #[inline]
-pub(crate) fn event<'a, T>(this: *mut Object, name: &'static str) -> &'a mut Event<T> {
+pub(crate) fn event<'a, T: Send>(this: *mut Object, name: &'static str) -> &'a mut Event<T> {
     unsafe { &mut *(*(*this).get_mut_ivar::<*mut c_void>(name) as *mut _) }
 }
 

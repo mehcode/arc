@@ -31,6 +31,6 @@ mod window;
 pub use yoga::{Align, Edge, FlexDirection, Justify, PositionType, Wrap};
 
 pub use self::{
-    color::*, context::*, event::*, events::*, font::*, geometry::*, layout::*, node::*, text::*,
-    view::*, window::*,
+    color::*, context::*, event::*, events::*, font::*, geometry::*, layout::*, node::*,
+    os::NodeId, text::*, view::*, window::*,
 };

@@ -2,7 +2,7 @@ extern crate arc;
 
 use arc::*;
 
-fn recursive_view(c: &Context, value: i16) -> View {
+fn recursive_view(value: i16) -> View {
     let (direction, color) = if value % 2 == 0 {
         if value % 4 == 0 {
             (FlexDirection::Row, 0xff_a9d2f0)
@@ -17,19 +17,19 @@ fn recursive_view(c: &Context, value: i16) -> View {
         }
     };
 
-    let mut view = View::new(c);
+    let mut view = View::new();
     view.set_flex_grow(8.);
     view.set_background_color(color);
     view.set_margin(Edge::All, 1.5);
 
-    let mut root = View::new(c);
+    let mut root = View::new();
     root.set_flex_direction(direction);
     root.add(view);
 
     let mut bview = if value != 0 {
-        recursive_view(c, value - 1)
+        recursive_view(value - 1)
     } else {
-        let mut v = View::new(c);
+        let mut v = View::new();
         v.set_background_color(0xff_f8e896);
         return v;
     };
@@ -41,12 +41,12 @@ fn recursive_view(c: &Context, value: i16) -> View {
 }
 
 fn main() {
-    let c = Context::new();
+    let mut c = Context::new();
 
-    let mut window = Window::new(&c, 1280., 800.);
+    let mut window = Window::new(1280., 800.);
     window.set_title("Fibonacci-ish");
-    window.set_view(recursive_view(&c, 12));
-    window.set_background_color(0xa9b2bb);
+    window.set_view(recursive_view(12));
+    window.set_background_color(0xff_a9b2bb);
 
     window.show();
 

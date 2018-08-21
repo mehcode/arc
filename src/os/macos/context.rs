@@ -10,9 +10,9 @@ use cocoa::{
 use dispatch;
 use lazy_static::*;
 use objc::{
+    class,
     declare::ClassDecl,
     msg_send,
-    class,
     runtime::{objc_autoreleasePoolPop, objc_autoreleasePoolPush, Class, Object, Sel, BOOL},
     sel, sel_impl,
 };
@@ -98,16 +98,6 @@ impl Context {
 
         unsafe {
             msg_send![app, run];
-        }
-    }
-
-    pub(crate) fn execute_on_main_thread(&self, callback: impl FnOnce() -> () + Send) {
-        let is_main_thread: bool = unsafe { msg_send![class!(NSThread), isMainThread] };
-
-        if is_main_thread {
-            callback();
-        } else {
-            dispatch::Queue::main().sync(callback);
         }
     }
 }

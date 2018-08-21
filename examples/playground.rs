@@ -1,15 +1,15 @@
 use arc::*;
 
 fn main() {
-    let c = Context::new();
+    let mut c = Context::new();
 
     // TODO: Look for a way to make this `const` or `static` (?)
-    let iosevka_300 = Font::builder(&c).name("Iosevka").weight(300).build();
+    let iosevka_300 = Font::builder().name("Iosevka").weight(300).build();
 
-    let mut window = Window::new(&c, 800., 800.);
+    let mut window = Window::new(800., 800.);
     window.set_title("Playground");
 
-    let mut cell = Text::new(&c);
+    let mut cell = Text::new();
     cell.set_background_color(0xff_fafafa);
     cell.set_flex_grow(1.);
     cell.set_font(&iosevka_300);
@@ -20,14 +20,14 @@ fn main() {
     cell.set_corner_radius(6.);
     cell.set_gravity(Gravity::CENTER);
 
-    let mut inner = View::new(&c);
+    let mut inner = View::new();
     inner.set_flex_grow(1.);
     inner.set_background_color(0xff_e2e2e2);
     inner.set_padding(Edge::All, 6.);
     inner.set_corner_radius(6.);
     inner.add(cell);
 
-    let mut root = View::new(&c);
+    let mut root = View::new();
     root.set_background_color(0xff_f5f5f5);
     root.set_padding(Edge::All, 20.);
     root.set_flex_direction(FlexDirection::Row);

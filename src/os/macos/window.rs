@@ -1,12 +1,13 @@
+use super::super::Nodes;
 use cocoa::{
     appkit::{NSBackingStoreType, NSWindow, NSWindowStyleMask},
-    base::{id, nil, NO, YES},
+    base::{nil, NO, YES},
     foundation::{NSPoint, NSRect, NSSize, NSString},
 };
-use crate::{Color, Node};
-use objc::{msg_send, sel, sel_impl};
+use crate::{Color, NodeId};
+use objc::{msg_send, runtime::Object, sel, sel_impl};
 
-pub(crate) struct Window(pub(crate) id);
+pub(crate) struct Window(pub(crate) *mut Object);
 
 impl Window {
     pub(crate) fn new(width: f32, height: f32) -> Self {
@@ -67,10 +68,13 @@ impl Window {
         }
     }
 
-    pub(crate) fn set_view(&mut self, node: &impl Node) {
-        unsafe {
-            msg_send![self.0, setContentView: node.handle()];
-        }
+    pub(crate) fn set_view(&mut self, node_id: NodeId) {
+        // NOTE: `Nodes::with_` is guaranteed to execute on the main thread which will
+        //       ensure we don't actually switch threads.
+        let this = self.0 as usize;
+        Nodes::with_untyped(node_id, move |node| unsafe {
+            msg_send![this as *mut Object, setContentView: node.handle()];
+        });
     }
 }
 

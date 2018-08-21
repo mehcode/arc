@@ -1,4 +1,4 @@
-use crate::{os, Context, WeakContext};
+use crate::os;
 
 pub struct Font {
     crate inner: os::Font,
@@ -6,8 +6,8 @@ pub struct Font {
 
 impl Font {
     #[inline]
-    pub fn builder(context: &Context) -> FontBuilder {
-        FontBuilder::new(context)
+    pub fn builder() -> FontBuilder {
+        FontBuilder::new()
     }
 }
 
@@ -16,20 +16,15 @@ pub struct FontBuilder {
     family: &'static str,
     weight: u16,
     italic: bool,
-
-    // NOTE: Currently this is only here to force Fonts to be made after `Context` creation
-    #[allow(dead_code)]
-    context: WeakContext,
 }
 
 impl FontBuilder {
     #[inline]
-    pub fn new(context: &Context) -> Self {
+    pub fn new() -> Self {
         Self {
             family: ".SF NS Text",
             weight: 400,
             italic: false,
-            context: context.downgrade(),
         }
     }
 

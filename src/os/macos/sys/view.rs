@@ -1,7 +1,7 @@
 use super::current_context;
 use cocoa::{
     appkit::NSEvent,
-    base::{id},
+    base::id,
     foundation::{NSPoint, NSRect, NSSize, NSUInteger},
 };
 use core_foundation::base::FromVoid;
@@ -13,11 +13,11 @@ use crate::{
 use foreign_types_shared::ForeignTypeRef;
 use lazy_static::*;
 use objc::{
+    class,
     declare::ClassDecl,
     msg_send,
     runtime::{Class, Object, Sel, BOOL, YES},
     sel, sel_impl,
-    class,
 };
 use std::{os::raw::c_void, ptr};
 use yoga;

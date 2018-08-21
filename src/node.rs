@@ -1,12 +1,5 @@
-use super::os;
-use downcast::{Any, *};
+use crate::NodeId;
 
-#[cfg_attr(feature = "cargo-clippy", allow(stutter))]
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
-pub struct NodeId(pub(crate) usize);
-
-pub trait Node: os::Node + Send + Any {
+pub trait Node: Send {
     fn id(&self) -> NodeId;
 }
-
-downcast!(dyn Node);

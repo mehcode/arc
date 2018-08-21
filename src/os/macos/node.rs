@@ -1,4 +1,5 @@
 use cocoa::base::{id, YES};
+use downcast::{Any, *};
 use objc::{msg_send, sel, sel_impl};
 use std::os::raw::c_void;
 use yoga;
@@ -11,7 +12,7 @@ pub(crate) fn yoga_from_handle(handle: id) -> &'static mut yoga::Node {
 }
 
 #[doc(hidden)]
-pub trait Node {
+pub trait Node: Any {
     fn handle(&self) -> NodeHandle;
 
     fn yoga(&mut self) -> &mut yoga::Node {
@@ -29,3 +30,5 @@ pub trait Node {
         }
     }
 }
+
+downcast!(dyn Node);
