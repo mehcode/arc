@@ -165,8 +165,9 @@ extern "C" fn dealloc(this: &Object, _: Sel) {
         for _ in 0..subviews_count {
             let subview: id = msg_send![subviews, objectAtIndex: 0];
 
-            // Remove (and release) subview
+            // Remove and release subview
             msg_send![subview, removeFromSuperview];
+            msg_send![subview, release];
         }
 
         //
