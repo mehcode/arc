@@ -1,5 +1,5 @@
 use crate::NodeId;
 
-pub trait Node: Send {
+pub trait Node {
     fn id(&self) -> NodeId;
 }

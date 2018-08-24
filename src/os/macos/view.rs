@@ -4,11 +4,6 @@ use objc::{msg_send, runtime::Object, sel, sel_impl};
 
 pub(crate) struct View(pub(crate) *mut Object);
 
-// NOTE: In order to send references of this packed in Context to different threads.
-//       It's very unsafe to touch these unless on the "main" thread but Context ensures
-//       public access is only allowed on main thread.
-unsafe impl Send for View {}
-
 impl View {
     pub(crate) fn new() -> Self {
         View(unsafe { msg_send![*sys::view::CLASS, new] })

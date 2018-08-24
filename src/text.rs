@@ -1,6 +1,4 @@
-use super::{
-    events, os, Align, Color, Context, Edge, Event, Font, Gravity, Node, NodeId, PositionType,
-};
+use super::{events, os, Align, Color, Edge, Event, Font, Gravity, Node, NodeId, PositionType};
 use std::mem::transmute;
 use yoga;
 
@@ -144,4 +142,4 @@ impl Node for Text {
 // Layout
 //
 
-impl_layout!(Text);
+// impl_layout!(Text);

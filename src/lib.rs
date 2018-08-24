@@ -4,13 +4,15 @@
     future_incompatible
 )]
 #![cfg_attr(feature = "cargo-clippy", warn(clippy_pedantic))]
-#![cfg_attr(feature = "cargo-clippy", allow(
-    // Dozens of false positives (for this crate): https://github.com/SSheldon/rust-objc/pull/71
-    replace_consts,
-    // Intended
-    cast_sign_loss,
-    cast_possible_truncation,
-))]
+// Dozens of false positives (for this crate): https://github.com/SSheldon/rust-objc/pull/71
+#![cfg_attr(feature = "cargo-clippy", allow(replace_consts))]
+// DEBUG
+#![allow(unused)]
+// Intended
+#![cfg_attr(
+    feature = "cargo-clippy",
+    allow(cast_sign_loss, cast_possible_truncation)
+)]
 
 #[macro_use]
 mod layout;
@@ -31,6 +33,6 @@ mod window;
 pub use yoga::{Align, Edge, FlexDirection, Justify, PositionType, Wrap};
 
 pub use self::{
-    color::*, context::*, event::*, events::*, font::*, geometry::*, layout::*, node::*,
-    os::NodeId, text::*, view::*, window::*,
+    color::*, event::*, events::*, font::*, geometry::*, layout::*, node::*, os::NodeId, text::*,
+    view::*, window::*,
 };

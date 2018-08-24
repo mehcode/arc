@@ -1,4 +1,4 @@
-use crate::{os, Color, Context, Node};
+use crate::{os, Color, Node};
 
 pub struct Window {
     pub(crate) inner: os::Window,
@@ -43,7 +43,7 @@ impl Window {
 
     /// Set the root view of the window.
     #[inline]
-    pub fn set_view(&mut self, node: impl Node + 'static) {
+    pub fn set_view(&mut self, node: impl Node) {
         self.inner.set_view(node.id());
     }
 }
