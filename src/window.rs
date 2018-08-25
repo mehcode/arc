@@ -47,7 +47,7 @@ impl Window {
 
     /// Set the root view of the window.
     #[inline]
-    pub fn set_view(&mut self, node: impl Node) {
-        self.inner.set_view(node.id());
+    pub fn set_root(&mut self, node: &impl Node) {
+        self.inner.set_root(node.id());
     }
 }

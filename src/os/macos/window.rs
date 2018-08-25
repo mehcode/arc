@@ -67,7 +67,7 @@ impl Window {
         }
     }
 
-    pub(crate) fn set_view(&mut self, node_id: NodeId) {
+    pub(crate) fn set_root(&mut self, node_id: NodeId) {
         // NOTE: `Nodes::with_` is guaranteed to execute on the main thread which will
         //       ensure we don't actually switch threads.
         let this = self.0 as usize;

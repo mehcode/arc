@@ -24,7 +24,7 @@ impl View {
     // TODO: Documentation
     //
 
-    pub fn add(&mut self, node: impl Node) {
+    pub fn add(&mut self, node: &impl Node) {
         let incoming_id = node.id();
 
         self.id.with::<os::View, _, _>(move |this| {
