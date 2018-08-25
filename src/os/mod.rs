@@ -1,13 +1,8 @@
 #[cfg(target_os = "macos")]
 mod macos;
 
-mod nodes;
-
 #[cfg(target_os = "macos")]
 pub(crate) use self::macos::*;
-
-pub use self::nodes::NodeId;
-pub(crate) use self::nodes::Nodes;
 
 use objc::{class, msg_send, sel, sel_impl};
 

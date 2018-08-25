@@ -1,22 +1,21 @@
-use super::{events, os, Align, Color, Edge, Event, Font, Gravity, Node, NodeId, PositionType};
+use super::{context::emplace, events, os, Color, Event, Font, Gravity, Node, NodeId};
 use std::mem::transmute;
-use yoga;
 
 #[derive(Copy, Clone)]
 pub struct Text {
-    pub(crate) inner: os::NodeId,
+    pub(crate) id: NodeId,
 }
 
 impl Text {
     pub fn new() -> Self {
         Self {
-            inner: os::Nodes::emplace(os::Text::new()),
+            id: emplace(os::Text::new()),
         }
     }
 
     #[inline]
     pub fn set_text(&mut self, text: impl AsRef<str> + Send) {
-        os::Nodes::with(self.inner, move |node: &mut os::Text| {
+        self.id.with_mut::<os::Text, _, _>(move |node| {
             node.set_text(text.as_ref());
         })
     }
@@ -27,7 +26,7 @@ impl Text {
 
     #[inline]
     pub fn set_gravity(&mut self, gravity: Gravity) {
-        os::Nodes::with(self.inner, move |node: &mut os::Text| {
+        self.id.with_mut::<os::Text, _, _>(move |node| {
             node.set_gravity(gravity);
         })
     }
@@ -43,7 +42,7 @@ impl Text {
     pub fn set_background_color(&mut self, color: impl Into<Color>) {
         let color = color.into();
 
-        os::Nodes::with(self.inner, move |node: &mut os::Text| {
+        self.id.with_mut::<os::Text, _, _>(move |node| {
             node.set_background_color(color);
         });
     }
@@ -53,7 +52,7 @@ impl Text {
     /// Default: `0`
     #[inline]
     pub fn set_corner_radius(&mut self, radius: f32) {
-        os::Nodes::with(self.inner, move |node: &mut os::Text| {
+        self.id.with_mut::<os::Text, _, _>(move |node| {
             node.set_corner_radius(radius);
         });
     }
@@ -66,14 +65,14 @@ impl Text {
     pub fn set_text_color(&mut self, color: impl Into<Color>) {
         let color = color.into();
 
-        os::Nodes::with(self.inner, move |node: &mut os::Text| {
+        self.id.with_mut::<os::Text, _, _>(move |node| {
             node.set_text_color(color);
         });
     }
 
     #[inline]
     pub fn set_text_size(&mut self, size: f32) {
-        os::Nodes::with(self.inner, move |node: &mut os::Text| {
+        self.id.with_mut::<os::Text, _, _>(move |node| {
             node.set_text_size(size);
         });
     }
@@ -87,7 +86,7 @@ impl Text {
         // FIXME: Find a better way to do this. Most likely removing this method so
         //        don't think on it too long.
         let font: usize = unsafe { transmute(font) };
-        os::Nodes::with(self.inner, move |node: &mut os::Text| {
+        self.id.with_mut::<os::Text, _, _>(move |node| {
             let font: &Font = unsafe { transmute(font) };
             node.set_font(&font.inner);
         });
@@ -100,30 +99,26 @@ impl Text {
 
     #[inline]
     pub fn mouse_down(&mut self) -> Event<events::MouseDown> {
-        os::Nodes::with(self.inner, move |node: &mut os::Text| {
-            node.mouse_down().clone()
-        })
+        self.id
+            .with_mut::<os::Text, _, _>(move |node| node.mouse_down().clone())
     }
 
     #[inline]
     pub fn mouse_up(&mut self) -> Event<events::MouseUp> {
-        os::Nodes::with(self.inner, move |node: &mut os::Text| {
-            node.mouse_up().clone()
-        })
+        self.id
+            .with_mut::<os::Text, _, _>(move |node| node.mouse_up().clone())
     }
 
     #[inline]
     pub fn mouse_enter(&mut self) -> Event<events::MouseEnter> {
-        os::Nodes::with(self.inner, move |node: &mut os::Text| {
-            node.mouse_enter().clone()
-        })
+        self.id
+            .with_mut::<os::Text, _, _>(move |node| node.mouse_enter().clone())
     }
 
     #[inline]
     pub fn mouse_leave(&mut self) -> Event<events::MouseLeave> {
-        os::Nodes::with(self.inner, move |node: &mut os::Text| {
-            node.mouse_leave().clone()
-        })
+        self.id
+            .with_mut::<os::Text, _, _>(move |node| node.mouse_leave().clone())
     }
 }
 
@@ -134,7 +129,7 @@ impl Text {
 impl Node for Text {
     #[inline]
     fn id(&self) -> NodeId {
-        self.inner
+        self.id
     }
 }
 
@@ -142,4 +137,4 @@ impl Node for Text {
 // Layout
 //
 
-// impl_layout!(Text);
+impl_layout!(Text);

@@ -7,7 +7,6 @@ use cocoa::{
     base::{id, nil, YES},
     foundation::{NSAutoreleasePool, NSProcessInfo, NSString},
 };
-use dispatch;
 use lazy_static::*;
 use objc::{
     class,

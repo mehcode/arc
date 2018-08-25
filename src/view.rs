@@ -1,8 +1,4 @@
-use super::{
-    events,
-    os::{self, Node as OsNode},
-    Align, Color, Edge, Event, FlexDirection, Justify, Node, NodeId, PositionType, Wrap,
-};
+use super::{context::emplace, events, os, Color, Event, Node, NodeId};
 use yoga;
 
 /// The fundamental component, `View` is a container that supports
@@ -19,7 +15,7 @@ pub struct View {
 impl View {
     pub fn new() -> Self {
         Self {
-            id: os::Nodes::emplace(os::View::new()),
+            id: emplace(os::View::new()),
         }
     }
 
@@ -29,7 +25,13 @@ impl View {
     //
 
     pub fn add(&mut self, node: impl Node) {
-        os::View::add(self.id(), node.id());
+        let incoming_id = node.id();
+
+        self.id.with::<os::View, _, _>(move |this| {
+            incoming_id.with_any(move |incoming| {
+                this.add(incoming);
+            });
+        });
     }
 
     //
@@ -43,7 +45,7 @@ impl View {
     pub fn set_background_color(&mut self, color: impl Into<Color>) {
         let color = color.into();
 
-        os::Nodes::with(self.id, move |node: &mut os::View| {
+        self.id.with_mut::<os::View, _, _>(move |node| {
             node.set_background_color(color);
         });
     }
@@ -53,40 +55,38 @@ impl View {
     /// Default: `0`
     #[inline]
     pub fn set_corner_radius(&mut self, radius: f32) {
-        os::Nodes::with(self.id, move |node: &mut os::View| {
+        self.id.with_mut::<os::View, _, _>(move |node| {
             node.set_corner_radius(radius);
         });
     }
 
     //
     // Events
-    // TODO: Documentation
+    // TODO: Rethink API here
     //
 
     #[inline]
     pub fn mouse_down(&mut self) -> Event<events::MouseDown> {
-        os::Nodes::with(self.id, move |node: &mut os::View| {
-            node.mouse_down().clone()
-        })
+        self.id
+            .with_mut::<os::View, _, _>(move |node| node.mouse_down().clone())
     }
 
     #[inline]
     pub fn mouse_up(&mut self) -> Event<events::MouseUp> {
-        os::Nodes::with(self.id, move |node: &mut os::View| node.mouse_up().clone())
+        self.id
+            .with_mut::<os::View, _, _>(move |node| node.mouse_up().clone())
     }
 
     #[inline]
     pub fn mouse_enter(&mut self) -> Event<events::MouseEnter> {
-        os::Nodes::with(self.id, move |node: &mut os::View| {
-            node.mouse_enter().clone()
-        })
+        self.id
+            .with_mut::<os::View, _, _>(move |node| node.mouse_enter().clone())
     }
 
     #[inline]
     pub fn mouse_leave(&mut self) -> Event<events::MouseLeave> {
-        os::Nodes::with(self.id, move |node: &mut os::View| {
-            node.mouse_leave().clone()
-        })
+        self.id
+            .with_mut::<os::View, _, _>(move |node| node.mouse_leave().clone())
     }
 }
 
@@ -106,4 +106,4 @@ impl Node for View {
 //
 
 impl_layout!(View);
-//impl_layout_container!(View);
+impl_layout_container!(View);

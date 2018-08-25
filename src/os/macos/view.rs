@@ -1,8 +1,13 @@
-use super::{super::Nodes, node::yoga_from_handle, sys, Node};
-use crate::{Color, Event, MouseDown, MouseEnter, MouseLeave, MouseUp, NodeId};
+use super::{node::yoga_from_handle, sys, Node};
+use crate::{Color, Event, MouseDown, MouseEnter, MouseLeave, MouseUp};
 use objc::{msg_send, runtime::Object, sel, sel_impl};
 
 pub(crate) struct View(pub(crate) *mut Object);
+
+// Nodes are safe to send between threads as long as they are only accessed on the
+// UI thread (which the public API should ensure).
+unsafe impl Send for View {}
+unsafe impl Sync for View {}
 
 impl View {
     pub(crate) fn new() -> Self {
@@ -13,22 +18,20 @@ impl View {
     // Container
     //
 
-    pub(crate) fn add(self_id: NodeId, node_id: NodeId) {
-        Nodes::with2_untyped((self_id, node_id), move |this, incoming| {
-            let this_node = yoga_from_handle(this.handle());
-            let this_node_children_count = this_node.child_count();
+    pub(crate) fn add(&self, node: &Box<dyn Node>) {
+        let this_node = yoga_from_handle(self.handle());
+        let this_node_children_count = this_node.child_count();
 
-            let incoming_handle = incoming.handle();
-            let incoming_node = yoga_from_handle(incoming_handle);
+        let incoming_handle = node.handle();
+        let incoming_node = yoga_from_handle(incoming_handle);
 
-            // Add this node as a sub-node (in layout)
-            this_node.insert_child(incoming_node, this_node_children_count);
+        // Add this node as a sub-node (in layout)
+        this_node.insert_child(incoming_node, this_node_children_count);
 
-            // Add the view as a sub-view (in ui)
-            unsafe {
-                msg_send![this.handle(), addSubview: incoming_handle];
-            }
-        });
+        // Add the view as a sub-view (in ui)
+        unsafe {
+            msg_send![self.handle(), addSubview: incoming_handle];
+        }
     }
 
     //

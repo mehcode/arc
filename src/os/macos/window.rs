@@ -1,4 +1,3 @@
-use super::super::Nodes;
 use cocoa::{
     appkit::{NSBackingStoreType, NSWindow, NSWindowStyleMask},
     base::{nil, NO, YES},
@@ -72,7 +71,7 @@ impl Window {
         // NOTE: `Nodes::with_` is guaranteed to execute on the main thread which will
         //       ensure we don't actually switch threads.
         let this = self.0 as usize;
-        Nodes::with_untyped(node_id, move |node| unsafe {
+        node_id.with_any(move |node| unsafe {
             msg_send![this as *mut Object, setContentView: node.handle()];
         });
     }

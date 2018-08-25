@@ -1,4 +1,4 @@
-use crate::{os, Color, Node};
+use crate::{context, os, Color, Node};
 
 pub struct Window {
     pub(crate) inner: os::Window,
@@ -6,6 +6,10 @@ pub struct Window {
 
 impl Window {
     pub fn new(width: f32, height: f32) -> Self {
+        // HACK: Ensure that a context exists as some platforms depend on this
+        //       being present.
+        context::ensure_exists();
+
         Self {
             inner: os::Window::new(width, height),
         }

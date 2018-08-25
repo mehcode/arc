@@ -1,4 +1,3 @@
-use cocoa::base::id;
 use crate::{
     events,
     os::{
@@ -7,14 +6,14 @@ use crate::{
     },
     Color, Event, Gravity,
 };
-use objc::{msg_send, sel, sel_impl};
+use objc::{msg_send, runtime::Object, sel, sel_impl};
 
-pub(crate) struct Text(pub(crate) id);
+pub(crate) struct Text(pub(crate) *mut Object);
 
-// NOTE: In order to send references of this packed in Context to different threads.
-//       It's very unsafe to touch these unless on the "main" thread but Context ensures
-//       public access is only allowed on main thread.
+// Nodes are safe to send between threads as long as they are only accessed on the
+// UI thread (which the public API should ensure).
 unsafe impl Send for Text {}
+unsafe impl Sync for Text {}
 
 impl Text {
     #[inline]
@@ -108,7 +107,7 @@ impl Drop for Text {
 
 impl Node for Text {
     #[inline]
-    fn handle(&self) -> id {
+    fn handle(&self) -> *mut Object {
         self.0
     }
 }
