@@ -22,11 +22,11 @@ chrono = "0.4.6"
 [target.'cfg(target_os = "macos")'.dependencies]
 objc = "0.2"
 dispatch = "0.1"
-core-foundation = { git = "https://github.com/mehcode/core-foundation-rs", rev = "3592afbd1aa81dca2951757b1d3d7a17582fe356" }
-core-foundation-sys = { git = "https://github.com/mehcode/core-foundation-rs", rev = "3592afbd1aa81dca2951757b1d3d7a17582fe356" }
-core-graphics = { git = "https://github.com/mehcode/core-foundation-rs", rev = "3592afbd1aa81dca2951757b1d3d7a17582fe356" }
-core-text = { git = "https://github.com/mehcode/core-foundation-rs", rev = "3592afbd1aa81dca2951757b1d3d7a17582fe356" }
-cocoa = { git = "https://github.com/mehcode/core-foundation-rs", rev = "3592afbd1aa81dca2951757b1d3d7a17582fe356" }
+core-foundation = { git = "https://github.com/servo/core-foundation-rs" }
+core-foundation-sys = { git = "https://github.com/servo/core-foundation-rs" }
+core-graphics = { git = "https://github.com/servo/core-foundation-rs" }
+core-text = { git = "https://github.com/servo/core-foundation-rs" }
+cocoa = { git = "https://github.com/servo/core-foundation-rs" }
 foreign-types-shared = "0.1"
 
 [profile.release]
@@ -34,8 +34,8 @@ codegen-units = 1
 lto = true
 
 [patch.crates-io]
-core-foundation = { git = "https://github.com/mehcode/core-foundation-rs", rev = "3592afbd1aa81dca2951757b1d3d7a17582fe356" }
-core-foundation-sys = { git = "https://github.com/mehcode/core-foundation-rs", rev = "3592afbd1aa81dca2951757b1d3d7a17582fe356" }
-core-graphics = { git = "https://github.com/mehcode/core-foundation-rs", rev = "3592afbd1aa81dca2951757b1d3d7a17582fe356" }
-core-text = { git = "https://github.com/mehcode/core-foundation-rs", rev = "3592afbd1aa81dca2951757b1d3d7a17582fe356" }
-cocoa = { git = "https://github.com/mehcode/core-foundation-rs", rev = "3592afbd1aa81dca2951757b1d3d7a17582fe356" }
+core-foundation = { git = "https://github.com/servo/core-foundation-rs" }
+core-foundation-sys = { git = "https://github.com/servo/core-foundation-rs" }
+core-graphics = { git = "https://github.com/servo/core-foundation-rs" }
+core-text = { git = "https://github.com/servo/core-foundation-rs" }
+cocoa = { git = "https://github.com/servo/core-foundation-rs" }
